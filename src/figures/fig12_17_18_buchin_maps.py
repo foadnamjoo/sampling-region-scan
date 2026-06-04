@@ -329,9 +329,10 @@ def render_rect_map_v3_9bin():
                               label="Buchin"),
               mpatches.Patch(facecolor="none", edgecolor=GEOM_COLOR, linewidth=1.2,
                               label="Geom-50")]
-    fig.legend(handles=legend, loc="lower center", ncol=2, fontsize=9,
-                frameon=False, bbox_to_anchor=(0.5, 0.05))
-    fig.subplots_adjust(left=0.04, right=1.0, top=0.97, bottom=0.08,
+    fig.legend(handles=legend, loc="lower center", ncol=4, fontsize=8.5,
+                frameon=False, bbox_to_anchor=(0.5, 0.02),
+                handletextpad=0.4, columnspacing=1.0)
+    fig.subplots_adjust(left=0.04, right=1.0, top=0.97, bottom=0.05,
                         wspace=0.0, hspace=-0.35)
     for ext in ("png", "pdf"):
         out = OUTPUTS / f"rect_map_v3_9bin.{ext}"
@@ -451,12 +452,12 @@ def render_disk_map_v3_9bin():
               mpatches.Circle((0, 0), 1, facecolor="none",
                               edgecolor=GEOM_COLOR, linewidth=1.6,
                               linestyle="-", label="Geom-50")]
-    fig.legend(handles=legend, loc="lower center", ncol=2, fontsize=9,
-                frameon=False, bbox_to_anchor=(0.5, 0.05),
-                handlelength=1.7, handleheight=1.7, handletextpad=0.7,
-                columnspacing=1.7,
+    fig.legend(handles=legend, loc="lower center", ncol=4, fontsize=8.5,
+                frameon=False, bbox_to_anchor=(0.5, 0.02),
+                handlelength=1.4, handleheight=1.4, handletextpad=0.4,
+                columnspacing=1.0,
                 handler_map={mpatches.Circle: HandlerCircle()})
-    fig.subplots_adjust(left=0.04, right=1.0, top=0.97, bottom=0.08,
+    fig.subplots_adjust(left=0.04, right=1.0, top=0.97, bottom=0.05,
                         wspace=0.0, hspace=-0.35)
     for ext in ("png", "pdf"):
         out = OUTPUTS / f"sanity_arkansas_map_disk_v3_9bin.{ext}"
