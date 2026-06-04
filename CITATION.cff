@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the associated paper. Citation details will be finalized once the paper is published."
+title: "PyScan-Paper: Code for Sampling for Region-Aggregated Spatial Scan Statistics"
+authors:
+  - family-names: Namjoo
+    given-names: Foad
+    affiliation: "University of Utah"
+  - family-names: McClelland
+    given-names: Drew
+    affiliation: "Taptap Send"
+  - family-names: Matheny
+    given-names: Michael
+    affiliation: "Meta"
+  - family-names: Phillips
+    given-names: "Jeff M."
+    affiliation: "University of Utah"
+license: MIT
+repository-code: "https://github.com/foadnamjoo/PyScan-Paper"
+preferred-citation:
+  type: generic
+  title: "Sampling for Region-Aggregated Spatial Scan Statistics"
+  authors:
+    - family-names: Namjoo
+      given-names: Foad
+    - family-names: McClelland
+      given-names: Drew
+    - family-names: Matheny
+      given-names: Michael
+    - family-names: Phillips
+      given-names: "Jeff M."
+  year: 2026
+  notes: "Manuscript under review. Full citation will be added after acceptance."
