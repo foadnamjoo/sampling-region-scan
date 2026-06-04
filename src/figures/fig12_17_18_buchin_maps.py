@@ -175,14 +175,17 @@ def _disk_curves(geom_pkl, buchin_9bin_pkl, centroid_pkl):
 
 
 def render_disk_two_sizes_9bin():
+    # Fonts tripled relative to the fig 8/9 reference; figure grown so the
+    # axes stay roughly the same shape in the rendered paper but text reads
+    # ~3x larger.
     plt.rcParams.update({
-        "axes.labelsize":  16,
-        "axes.titlesize":  17,
-        "xtick.labelsize": 13,
-        "ytick.labelsize": 13,
-        "legend.fontsize": 11.5,
+        "axes.labelsize":  48,
+        "axes.titlesize":  51,
+        "xtick.labelsize": 39,
+        "ytick.labelsize": 39,
+        "legend.fontsize": 34,
     })
-    fig, axes = plt.subplots(1, 2, figsize=(13, 5.0))
+    fig, axes = plt.subplots(1, 2, figsize=(34, 14))
     plateau_rows = []
     for ax, (key, (gp, bp, cp, label, planted_r)) in zip(axes, DISK_PKLS.items()):
         curves = _disk_curves(gp, bp, cp)
@@ -204,7 +207,7 @@ def render_disk_two_sizes_9bin():
                              curves["centroid"]["mean"][mask].mean(),
                              curves["buchin"]["mean"][mask].mean(),
                              curves["geom"]["mean"][mask].mean()))
-    fig.suptitle("Disk cluster recovery — Buchin 9-bin grid", fontsize=18)
+    fig.suptitle("Disk cluster recovery — Buchin 9-bin grid", fontsize=54)
     fig.tight_layout()
     for ext in ("png", "pdf"):
         out = OUTPUTS / f"sanity_disk_stress_two_sizes_9bin.{ext}"
