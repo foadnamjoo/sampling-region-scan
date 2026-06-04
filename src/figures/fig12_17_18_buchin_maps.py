@@ -187,18 +187,29 @@ def render_disk_two_sizes_9bin():
     })
     fig, axes = plt.subplots(1, 2, figsize=(34, 14))
     plateau_rows = []
+    # Match the v9 style used by every other curves figure:
+    #   Centroid = red dot-dash circle  (v9 default)
+    #   Buchin   = navy dashed circle   (fig 8/9 override)
+    #   Geom 50  = darkmagenta solid square (v9 default)
+    style = {
+        "centroid": dict(color=CENTROID_COLOR, ls=(0, (3, 5, 1, 5, 1, 5)),
+                         marker="o", ms=14, lw=4.0, label="Centroid"),
+        "buchin":   dict(color=BUCH_COLOR,     ls=(0, (5, 2)),
+                         marker="o", ms=12, lw=3.6, label="Buchin"),
+        "geom":     dict(color=GEOM_COLOR,     ls="-",
+                         marker="s", ms=13, lw=4.4, label="Geom 50"),
+    }
     for ax, (key, (gp, bp, cp, label, planted_r)) in zip(axes, DISK_PKLS.items()):
         curves = _disk_curves(gp, bp, cp)
-        for tag, color, lbl, marker in (
-                ("centroid", CENTROID_COLOR, "Centroid",               "v"),
-                ("buchin",   BUCH_COLOR,     "Buchin disk (9-bin)",    "o"),
-                ("geom",     GEOM_COLOR,     "Geom-50 disk",           "o")):
+        for tag in ("centroid", "buchin", "geom"):
             m, s = curves[tag]["mean"], curves[tag]["std"]
-            ax.fill_between(PQ_DIFF, m - s, m + s, color=color, alpha=BAND_ALPHA, lw=0)
-            ax.plot(PQ_DIFF, m, color=color, marker=marker, markersize=5, lw=1.8, label=lbl)
+            st = style[tag]
+            ax.fill_between(PQ_DIFF, m - s, m + s, color=st["color"],
+                            alpha=BAND_ALPHA, lw=0)
+            ax.plot(PQ_DIFF, m, **st)
         ax.set_title(label)
-        ax.set_xlabel("Signal strength (p − q diff)")
-        ax.set_ylabel("Jaccard distance (lower = better)")
+        ax.set_xlabel(r"$p - q$ difference")
+        ax.set_ylabel("JD")
         ax.set_ylim(-0.02, 1.05)
         ax.legend(loc="upper right")
         ax.grid(True, alpha=0.3)
@@ -207,7 +218,6 @@ def render_disk_two_sizes_9bin():
                              curves["centroid"]["mean"][mask].mean(),
                              curves["buchin"]["mean"][mask].mean(),
                              curves["geom"]["mean"][mask].mean()))
-    fig.suptitle("Disk cluster recovery — Buchin 9-bin grid", fontsize=54)
     fig.tight_layout()
     for ext in ("png", "pdf"):
         out = OUTPUTS / f"sanity_disk_stress_two_sizes_9bin.{ext}"
