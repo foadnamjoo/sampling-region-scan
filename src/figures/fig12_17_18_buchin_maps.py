@@ -191,13 +191,13 @@ def render_disk_two_sizes_9bin():
         "grid.linestyle":    "-",
         "xtick.major.size":  0,
         "ytick.major.size":  0,
-        "axes.labelsize":  48,
-        "axes.titlesize":  51,
-        "xtick.labelsize": 39,
-        "ytick.labelsize": 39,
-        "legend.fontsize": 34,
+        "axes.labelsize":  68,
+        "axes.titlesize":  72,
+        "xtick.labelsize": 56,
+        "ytick.labelsize": 56,
+        "legend.fontsize": 48,
     })
-    fig, axes = plt.subplots(1, 2, figsize=(34, 14))
+    fig, axes = plt.subplots(1, 2, figsize=(40, 16))
     plateau_rows = []
     # Match the v9 style used by every other curves figure:
     #   Centroid = red dot-dash circle  (v9 default)
