@@ -3,7 +3,7 @@
 <p align="center">
   <img src="docs/fig2_jdarkansas.png" alt="Discovered rectangle (green) converging on the planted target (red) as the pq-difference grows; Jaccard distance drops from 0.67 to 0.10." width="900">
 </p>
-<p align="center"><sub>The discovered scan window (green) converges on the planted target (red) as the signal strength grows — Jaccard distance falls from 0.67 to 0.10 across four Arkansas-county trials.</sub></p>
+<p align="center"><sub>The discovered scan window (green) converges on the planted target (red rectangle or disk) as the signal strength grows — Jaccard distance falls from 0.67 to 0.10 across five Arkansas-county trials.</sub></p>
 
 Code and figure scripts for the paper:
 
