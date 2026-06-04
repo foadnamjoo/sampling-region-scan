@@ -133,12 +133,12 @@ DISK_PKLS = {
     "large": (IO / "arkansas_disk_large.pkl",                 # geom data (existing)
               IO / "arkansas_disk_large_buchin_9bin.pkl",      # buchin 9-bin (new)
               IO / "arkansas_disk_large_centroid.pkl",         # centroid (existing)
-              "Larger cluster (radius 0.6°)",
+              "Larger cluster",
               0.6),
     "small": (IO / "arkansas_disk_small.pkl",
               IO / "arkansas_disk_small_buchin_9bin.pkl",
               IO / "arkansas_disk_small_centroid.pkl",
-              "Smaller cluster (radius 0.4°)",
+              "Smaller cluster",
               0.395),
 }
 
