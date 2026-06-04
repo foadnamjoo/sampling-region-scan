@@ -175,6 +175,13 @@ def _disk_curves(geom_pkl, buchin_9bin_pkl, centroid_pkl):
 
 
 def render_disk_two_sizes_9bin():
+    plt.rcParams.update({
+        "axes.labelsize":  16,
+        "axes.titlesize":  17,
+        "xtick.labelsize": 13,
+        "ytick.labelsize": 13,
+        "legend.fontsize": 11.5,
+    })
     fig, axes = plt.subplots(1, 2, figsize=(13, 5.0))
     plateau_rows = []
     for ax, (key, (gp, bp, cp, label, planted_r)) in zip(axes, DISK_PKLS.items()):
@@ -186,18 +193,18 @@ def render_disk_two_sizes_9bin():
             m, s = curves[tag]["mean"], curves[tag]["std"]
             ax.fill_between(PQ_DIFF, m - s, m + s, color=color, alpha=BAND_ALPHA, lw=0)
             ax.plot(PQ_DIFF, m, color=color, marker=marker, markersize=5, lw=1.8, label=lbl)
-        ax.set_title(label, fontsize=11)
+        ax.set_title(label)
         ax.set_xlabel("Signal strength (p − q diff)")
         ax.set_ylabel("Jaccard distance (lower = better)")
         ax.set_ylim(-0.02, 1.05)
-        ax.legend(loc="upper right", fontsize=9)
+        ax.legend(loc="upper right")
         ax.grid(True, alpha=0.3)
         mask = PQ_DIFF >= 0.5
         plateau_rows.append((label,
                              curves["centroid"]["mean"][mask].mean(),
                              curves["buchin"]["mean"][mask].mean(),
                              curves["geom"]["mean"][mask].mean()))
-    fig.suptitle("Disk cluster recovery — Buchin 9-bin grid", fontsize=13)
+    fig.suptitle("Disk cluster recovery — Buchin 9-bin grid", fontsize=18)
     fig.tight_layout()
     for ext in ("png", "pdf"):
         out = OUTPUTS / f"sanity_disk_stress_two_sizes_9bin.{ext}"

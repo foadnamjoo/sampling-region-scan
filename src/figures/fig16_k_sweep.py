@@ -165,6 +165,13 @@ def render_k_sweep() -> None:
     """PJD as a function of k at fixed pq, with one curve per dataset, merged
     across MULTI_SEEDS."""
     pp.apply_style_v9()
+    plt.rcParams.update({
+        "axes.labelsize":  16,
+        "axes.titlesize":  17,
+        "xtick.labelsize": 13,
+        "ytick.labelsize": 13,
+        "legend.fontsize": 11.5,
+    })
     datasets = [
         ("Arkansas",   "k_sweep_arkansas",   "red"),
         ("Utah",       "k_sweep_utah",       "darkorange"),
