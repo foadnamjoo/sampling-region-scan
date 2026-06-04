@@ -1,11 +1,5 @@
+from __future__ import annotations
 
-# --- repo paths (injected by transform) ---
-import sys as _sys
-from pathlib import Path as _Path
-_sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "src"))
-from _paths import REPO_ROOT, DATA, OUTPUTS, IO  # noqa: E402
-ROOT = REPO_ROOT  # backward compatibility for scripts that reference ROOT
-# --------------------------------------------
 """Shape-family floor figure (Arkansas, same style as JDArkansas.pdf).
 
 Two panels side by side:
@@ -16,7 +10,14 @@ Both Jaccard distances are computed over the same reference set A used by the
 paper: 500 uniformly random points per Arkansas county, ~37 500 points total.
 Independent of any Poisson draw — this is purely a shape-family floor.
 """
-from __future__ import annotations
+
+# --- repo paths (injected by transform) ---
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "src"))
+from _paths import REPO_ROOT, DATA, OUTPUTS, IO  # noqa: E402
+ROOT = REPO_ROOT  # backward compatibility for scripts that reference ROOT
+# --------------------------------------------
 
 import sys
 from pathlib import Path

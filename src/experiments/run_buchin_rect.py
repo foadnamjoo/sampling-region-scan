@@ -1,11 +1,5 @@
+from __future__ import annotations
 
-# --- repo paths (injected by transform) ---
-import sys as _sys
-from pathlib import Path as _Path
-_sys.path.insert(0, str(_Path(__file__).resolve().parents[2] / "src"))
-from _paths import REPO_ROOT, DATA, OUTPUTS, IO  # noqa: E402
-ROOT = REPO_ROOT  # backward compatibility for scripts that reference ROOT
-# --------------------------------------------
 """Buchin 9-bin grid sweep on Arkansas — mirror of the existing 5-bin runs.
 
 Re-runs Buchin with the original Dutch 9-multiplier grid
@@ -25,7 +19,14 @@ Output:
 
 Joblib n_jobs=4, caffeinate attached externally.
 """
-from __future__ import annotations
+
+# --- repo paths (injected by transform) ---
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[2] / "src"))
+from _paths import REPO_ROOT, DATA, OUTPUTS, IO  # noqa: E402
+ROOT = REPO_ROOT  # backward compatibility for scripts that reference ROOT
+# --------------------------------------------
 
 import math
 import os

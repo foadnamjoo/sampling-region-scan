@@ -1,11 +1,5 @@
+from __future__ import annotations
 
-# --- repo paths (injected by transform) ---
-import sys as _sys
-from pathlib import Path as _Path
-_sys.path.insert(0, str(_Path(__file__).resolve().parents[2] / "src"))
-from _paths import REPO_ROOT, DATA, OUTPUTS, IO  # noqa: E402
-ROOT = REPO_ROOT  # backward compatibility for scripts that reference ROOT
-# --------------------------------------------
 """Regenerate paper Fig 1: the Arkansas region-to-points sampling visualization.
 
 Design goals:
@@ -18,7 +12,14 @@ Design goals:
   * Corner badge announces `k`. No axis ticks; lat/lon clutter removed.
   * Style harmonized with v8: serif font, thin axes, white background.
 """
-from __future__ import annotations
+
+# --- repo paths (injected by transform) ---
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[2] / "src"))
+from _paths import REPO_ROOT, DATA, OUTPUTS, IO  # noqa: E402
+ROOT = REPO_ROOT  # backward compatibility for scripts that reference ROOT
+# --------------------------------------------
 
 import sys
 from pathlib import Path

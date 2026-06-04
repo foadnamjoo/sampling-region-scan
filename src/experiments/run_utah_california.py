@@ -1,11 +1,5 @@
+from __future__ import annotations
 
-# --- repo paths (injected by transform) ---
-import sys as _sys
-from pathlib import Path as _Path
-_sys.path.insert(0, str(_Path(__file__).resolve().parents[2] / "src"))
-from _paths import REPO_ROOT, DATA, OUTPUTS, IO  # noqa: E402
-ROOT = REPO_ROOT  # backward compatibility for scripts that reference ROOT
-# --------------------------------------------
 """Utah + California — paired Grid(40) vs Grid(100) accuracy check.
 
 Mirrors the original McClelland notebook cells (Utah cell 77, California cell 104),
@@ -20,7 +14,14 @@ Targets and shapefiles are verbatim from the notebook:
 
 Same exp_name, n_geom_list, iterations=20, p_probs = arange(0.2, 0.95, 0.05), q=0.2.
 """
-from __future__ import annotations
+
+# --- repo paths (injected by transform) ---
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[2] / "src"))
+from _paths import REPO_ROOT, DATA, OUTPUTS, IO  # noqa: E402
+ROOT = REPO_ROOT  # backward compatibility for scripts that reference ROOT
+# --------------------------------------------
 
 import math
 import os

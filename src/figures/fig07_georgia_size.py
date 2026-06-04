@@ -1,11 +1,5 @@
+from __future__ import annotations
 
-# --- repo paths (injected by transform) ---
-import sys as _sys
-from pathlib import Path as _Path
-_sys.path.insert(0, str(_Path(__file__).resolve().parents[2] / "src"))
-from _paths import REPO_ROOT, DATA, OUTPUTS, IO  # noqa: E402
-ROOT = REPO_ROOT  # backward compatibility for scripts that reference ROOT
-# --------------------------------------------
 """Render Figs 6, 7, 8, 9 with the polished academic style used for NYC/Utah/CA:
   - Title without parenthetical trial count
   - Math-typeset $p - q$ difference x-axis (or area %)
@@ -20,7 +14,14 @@ Figures produced (in buchin_attempt/, NOT touching the paper repo):
   fig8_arkansas_30_allmethods_inset.{pdf,png}
   fig9_arkansas_10_allmethods_inset.{pdf,png}
 """
-from __future__ import annotations
+
+# --- repo paths (injected by transform) ---
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[2] / "src"))
+from _paths import REPO_ROOT, DATA, OUTPUTS, IO  # noqa: E402
+ROOT = REPO_ROOT  # backward compatibility for scripts that reference ROOT
+# --------------------------------------------
 
 import pickle
 import sys

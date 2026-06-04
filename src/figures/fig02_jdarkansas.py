@@ -1,3 +1,12 @@
+from __future__ import annotations
+
+"""Fig 2: JDArkansas — 4-panel illustration of (target, discovered) rectangles
+for varying pq differences on Arkansas counties using Geom 5.  Seeded for
+reproducibility (seed=7), matching the rerun for every other figure.
+
+Mirrors `main_test(5, pq_diff)` from McClelland_22 cell 100, then renders the
+four panels in v9 paper style.
+"""
 
 # --- repo paths (injected by transform) ---
 import sys as _sys
@@ -6,14 +15,6 @@ _sys.path.insert(0, str(_Path(__file__).resolve().parents[2] / "src"))
 from _paths import REPO_ROOT, DATA, OUTPUTS, IO  # noqa: E402
 ROOT = REPO_ROOT  # backward compatibility for scripts that reference ROOT
 # --------------------------------------------
-"""Fig 2: JDArkansas — 4-panel illustration of (target, discovered) rectangles
-for varying pq differences on Arkansas counties using Geom 5.  Seeded for
-reproducibility (seed=7), matching the rerun for every other figure.
-
-Mirrors `main_test(5, pq_diff)` from McClelland_22 cell 100, then renders the
-four panels in v9 paper style.
-"""
-from __future__ import annotations
 
 import os
 import pickle

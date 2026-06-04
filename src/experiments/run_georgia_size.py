@@ -1,3 +1,11 @@
+from __future__ import annotations
+
+"""Re-run the Georgia size sweep with more trials so the Geom-50 mean
+curve is smooth in fig 7 (~20 trials → ~80 trials reduces noise by 2x).
+
+Saves to buchin_attempt/georgia_size_sweep_grid100_t80.pkl (does NOT
+overwrite the paper's georgia_size_sweep.pkl).
+"""
 
 # --- repo paths (injected by transform) ---
 import sys as _sys
@@ -6,13 +14,6 @@ _sys.path.insert(0, str(_Path(__file__).resolve().parents[2] / "src"))
 from _paths import REPO_ROOT, DATA, OUTPUTS, IO  # noqa: E402
 ROOT = REPO_ROOT  # backward compatibility for scripts that reference ROOT
 # --------------------------------------------
-"""Re-run the Georgia size sweep with more trials so the Geom-50 mean
-curve is smooth in fig 7 (~20 trials → ~80 trials reduces noise by 2x).
-
-Saves to buchin_attempt/georgia_size_sweep_grid100_t80.pkl (does NOT
-overwrite the paper's georgia_size_sweep.pkl).
-"""
-from __future__ import annotations
 
 import os
 import pickle

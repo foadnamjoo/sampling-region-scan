@@ -1,11 +1,5 @@
+from __future__ import annotations
 
-# --- repo paths (injected by transform) ---
-import sys as _sys
-from pathlib import Path as _Path
-_sys.path.insert(0, str(_Path(__file__).resolve().parents[2] / "src"))
-from _paths import REPO_ROOT, DATA, OUTPUTS, IO  # noqa: E402
-ROOT = REPO_ROOT  # backward compatibility for scripts that reference ROOT
-# --------------------------------------------
 """NYC accuracy experiment — paired Grid(40) vs Grid(100) check.
 
 Mirrors the original NYC experiment cell from McClelland's notebook (cell 94),
@@ -19,7 +13,14 @@ Same NYC target, same exp_name list, same 20 trials, same p_probs as cell 94.
 Output: nyc_grid100_check.pkl  (also contains the freshly-re-run Grid(40) curves).
 Plot:   nyc_grid40_vs_grid100.png  (overlay of Centroid + Geom-50 at both grids).
 """
-from __future__ import annotations
+
+# --- repo paths (injected by transform) ---
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[2] / "src"))
+from _paths import REPO_ROOT, DATA, OUTPUTS, IO  # noqa: E402
+ROOT = REPO_ROOT  # backward compatibility for scripts that reference ROOT
+# --------------------------------------------
 
 import math
 import os

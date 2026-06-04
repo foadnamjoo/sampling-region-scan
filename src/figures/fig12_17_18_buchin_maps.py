@@ -1,11 +1,5 @@
+from __future__ import annotations
 
-# --- repo paths (injected by transform) ---
-import sys as _sys
-from pathlib import Path as _Path
-_sys.path.insert(0, str(_Path(__file__).resolve().parents[2] / "src"))
-from _paths import REPO_ROOT, DATA, OUTPUTS, IO  # noqa: E402
-ROOT = REPO_ROOT  # backward compatibility for scripts that reference ROOT
-# --------------------------------------------
 """Render the four 9-bin comparison plots after arkansas_buchin_9bin_sweep finishes.
 
   1) rect_pq_two_sizes_9bin.{pdf,png}             — 2-panel rect pq curve, Centroid + Buchin (9-bin) + Geom-50 rect
@@ -15,7 +9,14 @@ ROOT = REPO_ROOT  # backward compatibility for scripts that reference ROOT
 
 All written alongside the existing 5-bin files. Existing PDFs/PNGs untouched.
 """
-from __future__ import annotations
+
+# --- repo paths (injected by transform) ---
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[2] / "src"))
+from _paths import REPO_ROOT, DATA, OUTPUTS, IO  # noqa: E402
+ROOT = REPO_ROOT  # backward compatibility for scripts that reference ROOT
+# --------------------------------------------
 
 import math
 import pickle
@@ -36,9 +37,9 @@ IO   = IO
 P_GRID  = np.round(np.arange(0.20, 0.95, 0.05), 4)
 PQ_DIFF = np.round(P_GRID - 0.20, 4)
 
-CENTROID_COLOR = "#7F7F7F"
-GEOM_COLOR     = "#1F77B4"
-BUCH_COLOR     = "#2CA02C"
+CENTROID_COLOR = "red"          # matches v9 Centroid curve
+BUCH_COLOR     = "#1F2D5C"      # matches Buchin override in fig 8/9 (navy)
+GEOM_COLOR     = "darkmagenta"  # matches v9 Geom 50 curve
 BAND_ALPHA     = 0.25
 
 PLANTED_CENTER = (-92.5, 34.75)
@@ -269,22 +270,23 @@ def render_rect_map_v3_9bin():
                 for _, r in sub.iterrows()]
 
     fetchers = {"centroid": centroid_rects, "buchin": buchin_rects_9bin, "geom": geom_rects}
-    # Compact 2x3 in v2 style — sized for full text width in a 2-column
-    # paper (figure*). Columns: Centroid / Buchin / Geom-50. Rows: large
-    # target (fig8) on top, small target (fig9) on bottom. Method name as
-    # column header on top row; row label rotated on first column.
-    fig, axes = plt.subplots(2, 3, figsize=(7.2, 4.8))
+    # 3 rows x 2 cols — sized to drop into a single \columnwidth slot in
+    # a 2-column ACM paper. Rows = methods (Centroid / Buchin / Geom-50),
+    # columns = target size (Large / Small). Method name as a rotated row
+    # label on the first column; target size as a column header on the
+    # first row.
+    fig, axes = plt.subplots(3, 2, figsize=(4.6, 6.6))
 
-    row_labels = {"fig8": "Large target",
+    col_labels = {"fig8": "Large target",
                   "fig9": "Small target"}
+    method_rows = (("centroid", CENTROID_COLOR, "Centroid"),
+                   ("buchin",   BUCH_COLOR,     "Buchin"),
+                   ("geom",     GEOM_COLOR,     "Geom-50"))
 
-    for r_idx, fig_name in enumerate(("fig8", "fig9")):
-        meta = fig_meta[fig_name]
-        cx0, cy0 = PLANTED_CENTER; W0, H0 = meta["WH"]
-        for c_idx, (tag, color, mlabel) in enumerate((
-                ("centroid", CENTROID_COLOR, "Centroid"),
-                ("buchin",   BUCH_COLOR,     "Buchin"),
-                ("geom",     GEOM_COLOR,     "Geom-50"))):
+    for r_idx, (tag, color, mlabel) in enumerate(method_rows):
+        for c_idx, fig_name in enumerate(("fig8", "fig9")):
+            meta = fig_meta[fig_name]
+            cx0, cy0 = PLANTED_CENTER; W0, H0 = meta["WH"]
             ax = axes[r_idx][c_idx]
             gdf.boundary.plot(ax=ax, color="#999999", linewidth=0.4,
                               rasterized=True)
@@ -306,10 +308,10 @@ def render_rect_map_v3_9bin():
             ax.set_xlim(minx, maxx); ax.set_ylim(miny, maxy)
             ax.margins(0, 0)
             if r_idx == 0:
-                ax.set_title(mlabel, fontsize=13, pad=8)
+                ax.set_title(col_labels[fig_name], fontsize=12, pad=6)
             if c_idx == 0:
-                ax.text(-0.02, 0.5, row_labels[fig_name],
-                        transform=ax.transAxes, fontsize=11,
+                ax.text(-0.04, 0.5, mlabel,
+                        transform=ax.transAxes, fontsize=12,
                         ha="right", va="center", rotation=90)
 
     legend = [mpatches.Patch(facecolor=(0, 0, 0, 0.06), edgecolor="black",
@@ -320,10 +322,10 @@ def render_rect_map_v3_9bin():
                               label="Buchin"),
               mpatches.Patch(facecolor="none", edgecolor=GEOM_COLOR, linewidth=1.2,
                               label="Geom-50")]
-    fig.legend(handles=legend, loc="lower center", ncol=4, fontsize=10,
-                frameon=False, bbox_to_anchor=(0.5, 0.02))
-    fig.subplots_adjust(left=0.04, right=1.0, top=0.93, bottom=0.10,
-                        wspace=0.0, hspace=0.04)
+    fig.legend(handles=legend, loc="lower center", ncol=2, fontsize=9,
+                frameon=False, bbox_to_anchor=(0.5, 0.0))
+    fig.subplots_adjust(left=0.06, right=0.99, top=0.95, bottom=0.10,
+                        wspace=0.02, hspace=0.04)
     for ext in ("png", "pdf"):
         out = OUTPUTS / f"rect_map_v3_9bin.{ext}"
         fig.savefig(out, dpi=300, bbox_inches="tight")

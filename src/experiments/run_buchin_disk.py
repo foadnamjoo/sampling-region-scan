@@ -1,11 +1,5 @@
+from __future__ import annotations
 
-# --- repo paths (injected by transform) ---
-import sys as _sys
-from pathlib import Path as _Path
-_sys.path.insert(0, str(_Path(__file__).resolve().parents[2] / "src"))
-from _paths import REPO_ROOT, DATA, OUTPUTS, IO  # noqa: E402
-ROOT = REPO_ROOT  # backward compatibility for scripts that reference ROOT
-# --------------------------------------------
 """Disk-Large planted disk pq sweep: r=0.6° at (-92.5, 34.75).
 
 Same protocol as Part 1 of arkansas_disk_stress.py (which used r=0.395),
@@ -15,7 +9,14 @@ case-generation, Geom-50 disk scan, and Buchin disk wrapper are byte-identical.
 20 trials × 15 p (p ∈ [0.20, 0.90] step 0.05), q = 0.20. Joblib n_jobs=4.
 Output: arkansas_disk_large.pkl (same schema as arkansas_disk_small.pkl).
 """
-from __future__ import annotations
+
+# --- repo paths (injected by transform) ---
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[2] / "src"))
+from _paths import REPO_ROOT, DATA, OUTPUTS, IO  # noqa: E402
+ROOT = REPO_ROOT  # backward compatibility for scripts that reference ROOT
+# --------------------------------------------
 
 import os
 import pickle
