@@ -331,7 +331,7 @@ def render_rect_map_v3_9bin():
                               label="Geom-50")]
     fig.legend(handles=legend, loc="lower center", ncol=2, fontsize=9,
                 frameon=False, bbox_to_anchor=(0.5, 0.0))
-    fig.subplots_adjust(left=0.06, right=0.99, top=0.95, bottom=0.10,
+    fig.subplots_adjust(left=0.06, right=0.99, top=0.95, bottom=0.03,
                         wspace=0.02, hspace=-0.30)
     for ext in ("png", "pdf"):
         out = OUTPUTS / f"rect_map_v3_9bin.{ext}"
