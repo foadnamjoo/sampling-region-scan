@@ -330,7 +330,7 @@ def render_rect_map_v3_9bin():
               mpatches.Patch(facecolor="none", edgecolor=GEOM_COLOR, linewidth=1.2,
                               label="Geom-50")]
     fig.legend(handles=legend, loc="lower center", ncol=4, fontsize=8.5,
-                frameon=False, bbox_to_anchor=(0.5, 0.02),
+                frameon=False, bbox_to_anchor=(0.5, 0.06),
                 handletextpad=0.4, columnspacing=1.0)
     fig.subplots_adjust(left=0.04, right=1.0, top=0.97, bottom=0.05,
                         wspace=0.0, hspace=-0.35)
@@ -453,7 +453,7 @@ def render_disk_map_v3_9bin():
                               edgecolor=GEOM_COLOR, linewidth=1.6,
                               linestyle="-", label="Geom-50")]
     fig.legend(handles=legend, loc="lower center", ncol=4, fontsize=8.5,
-                frameon=False, bbox_to_anchor=(0.5, 0.02),
+                frameon=False, bbox_to_anchor=(0.5, 0.06),
                 handlelength=1.4, handleheight=1.4, handletextpad=0.4,
                 columnspacing=1.0,
                 handler_map={mpatches.Circle: HandlerCircle()})
