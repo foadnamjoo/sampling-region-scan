@@ -380,18 +380,19 @@ def render_disk_map_v3_9bin():
             sub = df[np.isclose(df["p"], P_USED_MAP)]
         return [(r["disk_cx"], r["disk_cy"], r["disk_r"]) for _, r in sub.iterrows()]
 
-    # Compact 2x3 in v2 style — sized for full text width in a 2-column
-    # paper (figure*). Columns: Centroid / Buchin / Geom-50. Rows: large
-    # disk on top, small disk on bottom. Method name as column header on
-    # top row; row label rotated on first column.
-    fig, axes = plt.subplots(2, 3, figsize=(7.2, 4.8))
-    row_labels = {0: "Large disk", 1: "Small disk"}
-    for r_idx, c in enumerate(cfg):
-        for col_idx, (tag, color, mlabel) in enumerate((
-                ("centroid", CENTROID_COLOR, "Centroid"),
-                ("buchin",   BUCH_COLOR,     "Buchin"),
-                ("geom",     GEOM_COLOR,     "Geom-50"))):
-            ax = axes[r_idx][col_idx]
+    # 3 rows x 2 cols — sized to drop into a single \columnwidth slot in
+    # a 2-column ACM paper. Rows = methods (Centroid / Buchin / Geom-50),
+    # columns = disk size (Large / Small). Method name as a rotated row
+    # label on the first column; disk size as a column header on the
+    # first row.
+    fig, axes = plt.subplots(3, 2, figsize=(4.6, 6.6))
+    col_labels = {0: "Large disk", 1: "Small disk"}
+    method_rows = (("centroid", CENTROID_COLOR, "Centroid"),
+                   ("buchin",   BUCH_COLOR,     "Buchin"),
+                   ("geom",     GEOM_COLOR,     "Geom-50"))
+    for r_idx, (tag, color, mlabel) in enumerate(method_rows):
+        for c_idx, c in enumerate(cfg):
+            ax = axes[r_idx][c_idx]
             cx0, cy0 = PLANTED_CENTER
             gdf.boundary.plot(ax=ax, color="#999999", linewidth=0.4,
                               rasterized=True)
@@ -417,10 +418,10 @@ def render_disk_map_v3_9bin():
             ax.set_xlim(minx, maxx); ax.set_ylim(miny, maxy)
             ax.margins(0, 0)
             if r_idx == 0:
-                ax.set_title(mlabel, fontsize=13, pad=8)
-            if col_idx == 0:
-                ax.text(-0.02, 0.5, row_labels[r_idx],
-                        transform=ax.transAxes, fontsize=11,
+                ax.set_title(col_labels[c_idx], fontsize=12, pad=6)
+            if c_idx == 0:
+                ax.text(-0.04, 0.5, mlabel,
+                        transform=ax.transAxes, fontsize=12,
                         ha="right", va="center", rotation=90)
 
     # Circle legend handles with dashed border on "Planted disk" matching
@@ -450,13 +451,13 @@ def render_disk_map_v3_9bin():
               mpatches.Circle((0, 0), 1, facecolor="none",
                               edgecolor=GEOM_COLOR, linewidth=1.6,
                               linestyle="-", label="Geom-50")]
-    fig.legend(handles=legend, loc="lower center", ncol=4, fontsize=10,
-                frameon=False, bbox_to_anchor=(0.5, 0.02),
+    fig.legend(handles=legend, loc="lower center", ncol=2, fontsize=9,
+                frameon=False, bbox_to_anchor=(0.5, 0.0),
                 handlelength=1.7, handleheight=1.7, handletextpad=0.7,
                 columnspacing=1.7,
                 handler_map={mpatches.Circle: HandlerCircle()})
-    fig.subplots_adjust(left=0.04, right=1.0, top=0.93, bottom=0.10,
-                        wspace=0.0, hspace=0.04)
+    fig.subplots_adjust(left=0.06, right=0.99, top=0.95, bottom=0.03,
+                        wspace=0.02, hspace=-0.30)
     for ext in ("png", "pdf"):
         out = OUTPUTS / f"sanity_arkansas_map_disk_v3_9bin.{ext}"
         fig.savefig(out, dpi=300, bbox_inches="tight")
