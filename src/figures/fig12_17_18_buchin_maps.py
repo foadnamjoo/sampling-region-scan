@@ -31,6 +31,8 @@ import pandas as pd
 from matplotlib.legend_handler import HandlerPatch
 from shapely.geometry import Point, Polygon
 
+import paper_plots as pp  # noqa: E402
+
 SHP  = DATA / "arkansas/COUNTY_BOUNDARY.shp"
 IO   = IO
 
@@ -175,10 +177,20 @@ def _disk_curves(geom_pkl, buchin_9bin_pkl, centroid_pkl):
 
 
 def render_disk_two_sizes_9bin():
-    # Fonts tripled relative to the fig 8/9 reference; figure grown so the
-    # axes stay roughly the same shape in the rendered paper but text reads
-    # ~3x larger.
+    # Match the seaborn-darkgrid look the other curves figures use, then
+    # triple the fonts so text still reads ~3x larger than the fig 8/9
+    # reference. Figsize grows to fit.
+    pp.apply_style_v9()
     plt.rcParams.update({
+        "axes.facecolor":    "#EAEAF2",
+        "axes.edgecolor":    "white",
+        "axes.grid":         True,
+        "axes.axisbelow":    True,
+        "grid.color":        "white",
+        "grid.linewidth":    1.0,
+        "grid.linestyle":    "-",
+        "xtick.major.size":  0,
+        "ytick.major.size":  0,
         "axes.labelsize":  48,
         "axes.titlesize":  51,
         "xtick.labelsize": 39,
@@ -209,10 +221,9 @@ def render_disk_two_sizes_9bin():
             ax.plot(PQ_DIFF, m, **st)
         ax.set_title(label)
         ax.set_xlabel(r"$p - q$ difference")
-        ax.set_ylabel("JD")
+        ax.set_ylabel("Point Jaccard Distance")
         ax.set_ylim(-0.02, 1.05)
         ax.legend(loc="upper right")
-        ax.grid(True, alpha=0.3)
         mask = PQ_DIFF >= 0.5
         plateau_rows.append((label,
                              curves["centroid"]["mean"][mask].mean(),
