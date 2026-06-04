@@ -1,5 +1,9 @@
 # PyScan-Paper
 
+<p align="center">
+  <img src="docs/fig1_arkansas_sampling.png" alt="Each Arkansas county is replaced with k uniformly-sampled points; k=10 (left) vs k=50 (right)." width="780">
+</p>
+
 Code and figure scripts for the paper:
 
 > **Sampling for Region-Aggregated Spatial Scan Statistics.**
