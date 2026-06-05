@@ -1,4 +1,4 @@
-# PyScan-Paper
+# Sampling for Region-Aggregated Spatial Scan Statistics
 
 <p align="center">
   <img src="docs/fig2_jdarkansas.png" alt="Discovered rectangle (green) converging on the planted target (red) as the pq-difference grows; Jaccard distance drops from 0.67 to 0.10." width="900">
@@ -27,8 +27,8 @@ The repo lets you reproduce every claim in the paper from scratch.
 ## Installation
 
 ```bash
-git clone https://github.com/foadnamjoo/PyScan-Paper.git
-cd PyScan-Paper
+git clone https://github.com/foadnamjoo/sampling-region-scan.git
+cd sampling-region-scan
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
