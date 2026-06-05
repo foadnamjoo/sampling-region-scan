@@ -5,6 +5,11 @@
 </p>
 <p align="center"><sub>The discovered scan window (green) converges on the planted target (red rectangle or disk) as the signal strength grows — Jaccard distance falls from 0.67 to 0.10 across five Arkansas-county trials.</sub></p>
 
+<p align="center">
+  <img src="docs/disk_recovery_arkansas.png" alt="Discovered disk windows on Arkansas for the planted large (top) and small (bottom) disk targets, comparing Centroid (red), Buchin (navy), and Geom-50 (magenta) across 20 trials. Geom-50 recovers the correct disk; Centroid degenerates; Buchin oversizes." width="900">
+</p>
+<p align="center"><sub>Disk-shape recovery on Arkansas counties: Centroid (red) degenerates, Buchin (navy) oversizes, Geom-50 (magenta) recovers the planted disk at the right scale on both large (top) and small (bottom) targets.</sub></p>
+
 Code and figure scripts for the paper:
 
 > **Sampling for Region-Aggregated Spatial Scan Statistics.**
