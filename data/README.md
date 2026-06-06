@@ -12,6 +12,7 @@ This directory is empty by design — we do not redistribute shapefiles. Downloa
 | **Georgia counties** | US Census TIGER/Line — Georgia counties | Used in Figs 7, 14 |
 | **NYC zip codes** | [NYC OpenData — Modified Zip Code Tabulation Areas](https://data.cityofnewyork.us/) | 263 zip codes; used in Fig 3 |
 | **US counties (continental)** | US Census TIGER/Line — counties (national) | 3,711 counties (continental); used in Fig 6 |
+| **California Valley Fever cases / population** | [CHHS Open Data Portal — Infectious Diseases by Disease, County, Year, and Sex](https://data.chhs.ca.gov/dataset/03e61434-7db8-4a53-a3e2-1d4d36d6848d) | Used in Appendix C (Figs 15, 16). Download the CSV and save as `data/valley_fever/idb.csv`. |
 
 ## Expected layout
 
@@ -19,12 +20,13 @@ After downloading, place each shapefile under `data/` like so:
 
 ```
 data/
-  arkansas/   COUNTY_BOUNDARY.shp + .shx + .dbf + .prj
-  utah/       geo_export_*.shp + ...
-  california/ cnty19_1.shp + ...
-  georgia/    ... .shp
-  nyc/        ZIP_CODE_*.shp
-  usa/        cb_*_us_county_*.shp
+  arkansas/      COUNTY_BOUNDARY.shp + .shx + .dbf + .prj
+  utah/          geo_export_*.shp + ...
+  california/    cnty19_1.shp + ...
+  georgia/       ... .shp
+  nyc/           ZIP_CODE_*.shp
+  usa/           cb_*_us_county_*.shp
+  valley_fever/  idb.csv                      # CHHS Coccidioidomycosis CSV
 ```
 
 Each experiment script under `src/experiments/` documents the exact filename it expects. If you put files elsewhere, edit the `SHP` path constant at the top of each script.
