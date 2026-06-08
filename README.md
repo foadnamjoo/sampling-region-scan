@@ -22,6 +22,8 @@ This repository contains the Python experiments and figure-rendering scripts tha
 
 We replace each spatial region with `k = 20–50` uniformly-sampled points (instead of a single centroid). This simple change significantly improves the statistical power of point-based spatial scan statistics applied to region-aggregated input (census tracts, zip codes, counties), without changing the underlying scan algorithm. Runtime stays roughly constant because pyScan's fixed-resolution grid scan does not depend on the input point count.
 
+We validate the method on six planted-region datasets (Arkansas, NYC, Utah, California, Georgia, USA) and on real data — California Valley Fever county-level incidence, where the endemic region is fixed by soil ecology rather than the case counts.
+
 The repo lets you reproduce every claim in the paper from scratch.
 
 ## Installation
@@ -59,11 +61,12 @@ Each figure corresponds to a single script under `src/figures/`. Many figures de
 | Fig 6 — USA counties | (uses cached results) | `src/figures/fig03_06_state_curves.py` |
 | Fig 7 — Georgia size sweep | `src/experiments/run_georgia_size.py` | `src/figures/fig07_georgia_size.py` |
 | Figs 8, 9 — Arkansas vs FlexScan + Buchin | `src/experiments/run_buchin_rect.py` | `src/figures/fig08_09_arkansas_buchin.py` |
-| Fig 12 — Rect map, all methods | `src/experiments/run_buchin_rect.py` | `src/figures/fig12_17_18_buchin_maps.py` |
-| Fig 14 — Georgia ablation | `src/experiments/run_georgia_ablation.py` | `src/figures/fig14_georgia_ablation.py` |
-| Fig 16 — k-sweep across datasets | (uses cached results) | `src/figures/fig16_k_sweep.py` |
-| Figs 17, 18 — Disk Buchin comparison (App B) | `src/experiments/run_buchin_disk.py` | `src/figures/fig12_17_18_buchin_maps.py` |
-| Tables 1, 2 — Runtime | `src/experiments/run_runtime.py` | (printed to stdout) |
+| Fig 10 — Rect map, all methods | `src/experiments/run_buchin_rect.py` | `src/figures/fig12_17_18_buchin_maps.py` |
+| Fig 11 — Georgia ablation | `src/experiments/run_georgia_ablation.py` | `src/figures/fig14_georgia_ablation.py` |
+| Fig 12 — k-sweep across datasets | (uses cached results) | `src/figures/fig16_k_sweep.py` |
+| Fig 13 — California Valley Fever (real data) | `src/run_experiment_real.py --valley` | `src/figures/fig15_16_valley_fever.py` |
+| Figs 14, 15 — Disk Buchin comparison (App B) | `src/experiments/run_buchin_disk.py` | `src/figures/fig12_17_18_buchin_maps.py` |
+| Table 1 — Runtime | `src/experiments/run_runtime.py` | (printed to stdout) |
 
 All outputs are written under `outputs/` (gitignored).
 
@@ -74,14 +77,15 @@ src/
   _paths.py                  Repo-relative path constants
   paper_plots.py             Shared matplotlib styling (v8 / v9)
   shape_floor.py             Shape-family floor computation (Fig 2)
-  run_experiment.py          Experiment registry + sampling helpers
+  run_experiment.py          Synthetic experiment registry + sampling helpers
+  run_experiment_real.py     Real-data pipeline (Valley Fever, Fig 13)
   run_buchin_comparison.py   Buchin et al. (2012) Java head-to-head driver
-  arkansas_disk_stress.py    Disk-family stress test (Figs 17, 18)
+  arkansas_disk_stress.py    Disk-family stress test (Figs 14, 15)
   render_paper_figs_inset.py Inset-map renderer used by several figures
   experiments/               Data-generating scripts (one pickle per run)
   figures/                   Plot rendering — one script per paper figure
 data/
-  README.md                  Shapefile sources (no data redistributed)
+  README.md                  Shapefile / CSV sources (no data redistributed)
 outputs/                     Generated figures and pickles (gitignored)
 ```
 
