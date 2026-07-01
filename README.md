@@ -28,6 +28,8 @@ The repo lets you reproduce every claim in the paper from scratch.
 
 ## Installation
 
+Tested on **Python 3.11**, macOS 14 (Sonoma), and Ubuntu 22.04.
+
 ```bash
 git clone https://github.com/foadnamjoo/sampling-region-scan.git
 cd sampling-region-scan
@@ -35,15 +37,50 @@ python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-You also need [pyScan](https://github.com/michaelmathen/pyscan) built locally — see its README for build instructions. Once built, either install it into your venv or point `PYTHONPATH` at the build directory so `import pyscan` works. A few scripts also need the build directory as the working directory at import time; if so, set the `PYSCAN_BUILD` environment variable to the absolute path of `pyscan/build/`.
+### pyScan (required)
+
+You also need [pyScan](https://github.com/michaelmathen/pyscan) built locally. The paper was produced against pyScan `main` as of June 2026. Build following pyScan's README, then either install it into your venv or point `PYTHONPATH` at the build directory:
 
 ```bash
 export PYTHONPATH=/path/to/pyscan/build
-export PYSCAN_BUILD=/path/to/pyscan/build     # only if pyscan needs chdir at import
+```
+
+Smoke-test the install:
+
+```bash
+python -c "import pyscan; print(pyscan.__file__)"
+```
+
+If that prints a path, you're set for the synthetic experiments (`run_experiment.py`, all figures 1–12).
+
+### PYSCAN_BUILD env var (only for real-data + Buchin comparisons)
+
+Two scripts — `src/run_experiment_real.py` and `src/run_buchin_comparison.py` — call `os.chdir(PYSCAN_BUILD)` at import so pyScan can find its bundled shared libraries. Set it only if you run those two:
+
+```bash
+export PYSCAN_BUILD=/path/to/pyscan/build
+```
+
+### macOS: shared-library search path
+
+On macOS you also need to expose pyScan's third-party libraries to the dynamic linker:
+
+```bash
 export DYLD_LIBRARY_PATH=/path/to/pyscan/build/thirdparty/discrepancy:\
 /path/to/pyscan/build/thirdparty/kernel/ANN:\
-/path/to/pyscan/build/thirdparty/kernel/coreset   # macOS only
+/path/to/pyscan/build/thirdparty/kernel/coreset
 ```
+
+Linux: not required (linker resolves via RPATH).
+
+## Quickstart — reproduce Fig 2 in 5 minutes
+
+```bash
+python src/experiments/run_arkansas.py     # ~2 min, writes outputs/arkansas/*.pkl
+python src/figures/fig02_jdarkansas.py     # ~30 s, writes outputs/fig02_jdarkansas.pdf
+```
+
+That gives you the target-vs-discovered rectangle panels shown at the top of this README (paper Fig 2).
 
 ## Data
 
@@ -58,7 +95,7 @@ Each figure corresponds to a single script under `src/figures/`. Many figures de
 | Fig 1 — Arkansas region sampling | — | `src/figures/fig01_arkansas_sampling.py` |
 | Fig 2 — JD Arkansas, Geom 5 | `src/experiments/run_arkansas.py` | `src/figures/fig02_jdarkansas.py` |
 | Figs 3, 4, 5 — NYC, Utah, California | `src/experiments/run_nyc.py`, `run_utah_california.py` | `src/figures/fig03_06_state_curves.py` |
-| Fig 6 — USA counties | (uses cached results) | `src/figures/fig03_06_state_curves.py` |
+| Fig 6 — USA counties | `src/experiments/run_usa.py` (cached at `outputs/usa/`) | `src/figures/fig07_georgia_size.py` (`render_fig6_usa`) |
 | Fig 7 — Georgia size sweep | `src/experiments/run_georgia_size.py` | `src/figures/fig07_georgia_size.py` |
 | Figs 8, 9 — Arkansas vs FlexScan + Buchin | `src/experiments/run_buchin_rect.py` | `src/figures/fig08_09_arkansas_buchin.py` |
 | Fig 10 — Rect map, all methods | `src/experiments/run_buchin_rect.py` | `src/figures/fig12_17_18_buchin_maps.py` |
@@ -91,9 +128,11 @@ outputs/                     Generated figures and pickles (gitignored)
 
 ## Citation
 
+Machine-readable metadata is in [`CITATION.cff`](CITATION.cff) at the repo root; GitHub renders a "Cite this repository" button from it in the sidebar.
+
 > Camera-ready citation will be added after acceptance and publication.
 
-If you'd like to cite the preprint version while the paper is under review, please contact the authors.
+If you'd like to cite the preprint version while the paper is under review, please contact the authors or use the `CITATION.cff` metadata.
 
 ## Acknowledgments
 

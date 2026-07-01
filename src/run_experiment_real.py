@@ -1045,14 +1045,9 @@ def cholera_run():
 # Everything in EPSG:3310 (CA Albers, metres).
 
 # The CA county shapefile is the same one run_experiment.py uses for the
-# synthetic California experiment. In a fresh clone this would live at
-# DATA / "california" / "cnty19_1.shp" — but here the file is in the original
-# working tree, so we resolve the path the user already has.
-_VF_CA_DEFAULT = DATA / "california" / "cnty19_1.shp"
-if not _VF_CA_DEFAULT.exists():
-    _VF_CA_DEFAULT = Path("/Users/foadnamjoo/PROJECT/PYSCAN/pyscan/data/data/"
-                           "California_County_Boundaries/cnty19_1.shp")
-CA_SHP_VF = _VF_CA_DEFAULT
+# synthetic California experiment. Expected at data/california/cnty19_1.shp
+# per data/README.md; download from the source listed there if missing.
+CA_SHP_VF = DATA / "california" / "cnty19_1.shp"
 CHHS_CSV  = DATA / "valley_fever" / "idb.csv"
 
 # Cause-defined S* candidates ----------------------------------------------
