@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite the associated paper. Citation details will be finalized once the paper is published."
+message: "If you use this software, please cite the paper below (arXiv:2607.01451)."
 title: "Sampling for Region-Aggregated Spatial Scan Statistics"
 authors:
   - family-names: Namjoo
@@ -17,7 +17,7 @@ authors:
 license: MIT
 repository-code: "https://github.com/foadnamjoo/sampling-region-scan"
 preferred-citation:
-  type: generic
+  type: article
   title: "Sampling for Region-Aggregated Spatial Scan Statistics"
   authors:
     - family-names: Namjoo
@@ -29,4 +29,8 @@ preferred-citation:
     - family-names: Phillips
       given-names: "Jeff M."
   year: 2026
-  notes: "Manuscript under review. Full citation will be added after acceptance."
+  url: "https://arxiv.org/abs/2607.01451"
+  identifiers:
+    - type: other
+      value: "arXiv:2607.01451"
+  notes: "Preprint; under review."
