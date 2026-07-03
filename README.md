@@ -14,7 +14,7 @@ Code and figure scripts for the paper:
 
 > **Sampling for Region-Aggregated Spatial Scan Statistics.**
 > Foad Namjoo, Drew McClelland, Michael Matheny, Jeff M. Phillips.
-> *Manuscript under review.*
+> *[arXiv:2607.01451](https://arxiv.org/abs/2607.01451) — under review.*
 
 This repository contains the Python experiments and figure-rendering scripts that reproduce every figure and runtime table in the paper, built on top of [pyScan](https://github.com/michaelmathen/pyscan).
 
@@ -130,9 +130,9 @@ outputs/                     Generated figures and pickles (gitignored)
 
 Machine-readable metadata is in [`CITATION.cff`](CITATION.cff) at the repo root; GitHub renders a "Cite this repository" button from it in the sidebar.
 
-> Camera-ready citation will be added after acceptance and publication.
+> Preprint: [arXiv:2607.01451](https://arxiv.org/abs/2607.01451). Camera-ready citation will be added after acceptance.
 
-If you'd like to cite the preprint version while the paper is under review, please contact the authors or use the `CITATION.cff` metadata.
+To cite the preprint, use the `CITATION.cff` metadata or the arXiv reference above.
 
 ## Acknowledgments
 
