@@ -132,7 +132,11 @@ def _finish_chrome(fig, ax, title, xlabel, ncol):
 # Fig 6, Fig 8, Fig 9 — standard methods curves (with FlexScan for Arkansas)
 # ---------------------------------------------------------------------------
 
-USA_SHP = DATA / "usa/cb_2018_us_county_within_cd116_500k.shp"
+# Figure 6 scans ORDINARY counties: cb_2017_us_county_500k, 3,108 rows after
+# the mainland filter. The county-by-congressional-district file
+# (cb_2018_us_county_within_cd116_500k, 3,711 rows) is a DIFFERENT partition
+# and is used only by the runtime experiment; see src/experiments/run_runtime.py.
+USA_SHP = DATA / "usa/cb_2017_us_county_500k.shp"
 ARK_SHP = DATA / "arkansas/COUNTY_BOUNDARY.shp"
 
 USA_TARGET = Polygon([(-100, 33), (-100, 40), (-90, 40), (-90, 33)])

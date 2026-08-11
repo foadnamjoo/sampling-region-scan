@@ -13,9 +13,23 @@ Run from project root:
         [utah|nyc|california|usa|georgia_ablation|arkansas_30|arkansas_10|k_sweep|all]
 
 Outputs go to outputs/cached_data/.
+
+Evaluation
+----------
+Point Jaccard distance is measured on a FIXED evaluation set A: 500 uniform
+points per input region, evaluation seed 42, built once per dataset and reused
+across every method, k, rate contrast, trial and experiment seed. This is the
+default for all four experiment kinds. A is drawn from its own generator, so
+constructing it perturbs no scan location, no Bernoulli draw and no discovered
+rectangle. Area Jaccard is polygon-based and is unaffected.
+
+Set PYSCAN_LEGACY_MEASURED_JD=1 to restore the historical behaviour, in which
+each trial was scored only on the points it happened to select. That flag exists
+solely to reproduce previously published numbers.
 """
 from __future__ import annotations
 
+import copy
 import os
 import pickle
 import random
@@ -33,6 +47,14 @@ from tqdm import tqdm
 # unset, we assume pyscan is already importable on PYTHONPATH.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from _paths import REPO_ROOT, DATA, OUTPUTS  # noqa: E402
+from fixed_a_evaluation import (  # noqa: E402
+    DEFAULT_EVAL_SEED,
+    DEFAULT_POINTS_PER_REGION,
+    EVALUATE_ON_FIXED_A,
+    EvalSet,
+    points_checksum,
+    record_template,
+)
 ROOT = REPO_ROOT
 
 _pyscan_build = os.environ.get("PYSCAN_BUILD")
@@ -52,6 +74,48 @@ Q = 0.2
 
 METHOD_NAMES = ["Centroid", "Random Point", "Geom 5", "Geom 10", "Geom 50"]
 METHOD_K = {"Centroid": 0, "Random Point": 1, "Geom 5": 5, "Geom 10": 10, "Geom 50": 50}
+
+# ---------- Fixed evaluation set A ----------------------------------------------
+# The paper defines Point Jaccard distance on a fixed reference set A. Fixed-A
+# evaluation is the DEFAULT here. Set PYSCAN_LEGACY_MEASURED_JD=1 to fall back to
+# the historical behaviour (scoring each trial on its own Bernoulli-selected
+# measured points), which exists only to reproduce previously published numbers.
+EVAL_SEED = DEFAULT_EVAL_SEED                      # 42
+EVAL_POINTS_PER_REGION = DEFAULT_POINTS_PER_REGION  # 500
+LEGACY_MEASURED_JD = os.environ.get("PYSCAN_LEGACY_MEASURED_JD", "0") == "1"
+USE_FIXED_A = EVALUATE_ON_FIXED_A and not LEGACY_MEASURED_JD
+
+
+def build_evaluator(gdf, name: str = "") -> EvalSet | None:
+    """One fixed evaluation set A per dataset.
+
+    A is drawn from its OWN generator seeded with ``EVAL_SEED``, so building it
+    consumes nothing from the experiment RNG and therefore perturbs no scan
+    location, no Bernoulli coin and no discovered rectangle.
+    """
+    if not USE_FIXED_A:
+        print(f"  [{name}] LEGACY evaluation (PYSCAN_LEGACY_MEASURED_JD=1): Point "
+              f"Jaccard scored on each trial's measured points", flush=True)
+        return None
+    ev = EvalSet.build(gdf, points_per_region=EVAL_POINTS_PER_REGION,
+                       eval_seed=EVAL_SEED)
+    print(f"  [{name}] fixed evaluation set A: |A|={len(ev.points)} "
+          f"({EVAL_POINTS_PER_REGION} pts/region x {len(gdf)} regions, "
+          f"eval seed {EVAL_SEED})", flush=True)
+    return ev
+
+
+def eval_provenance(ev: EvalSet | None) -> dict:
+    """Evaluation-side provenance stored alongside every result pickle."""
+    if ev is None:
+        return {"mode": "legacy_measured_points", "eval_seed": None,
+                "points_per_region": None}
+    return {"mode": "fixed_A", **ev.provenance()}
+
+
+def _snap(rng: np.random.Generator) -> dict:
+    """Deep copy of the generator state, so a point set can be reconstructed."""
+    return copy.deepcopy(rng.bit_generator.state)
 
 
 # ---------- Sampling helpers ----------------------------------------------------
@@ -92,9 +156,26 @@ def point_set_for_method(gdf, k: int, rng: np.random.Generator) -> np.ndarray:
 
 def weighted_point_set_for_method(gdf, weights: np.ndarray, k_max: int, k_min: int,
                                   rng: np.random.Generator) -> np.ndarray:
-    """Weighted-by-population sampling: each region gets at least k_min points,
-    remaining points distributed proportionally to `weights` (Georgia notebook uses
-    population; we use aland10 as proxy here). Capped at k_max per region.
+    """Capped weighted sampling: n_i = clip(round(w_i * n * k_max / sum_j w_j),
+    k_min, k_max), with locations uniform inside each region.
+
+    IMPORTANT: this is NOT an equal-budget reallocation. Points removed by the
+    upper cap are never redistributed, so the realized total is well below the
+    uniform total. Measured on the Georgia ablation with real county population:
+
+        Geom 5    380 points weighted vs   795 uniform  (-52%)
+        Geom 10 1,014 points weighted vs 1,590 uniform  (-36%)
+        Geom 50 4,577 points weighted vs 7,950 uniform  (-42%)
+        Centroid and Random Point are identical (159 each) by construction.
+
+    The cap also prevents the concentration the weighting is meant to produce:
+    after clamping, Georgia's four largest counties receive only 4-5% of the
+    points, not the 33% their population share would imply. Treat this arm as a
+    sensitivity test, not as an allocation comparison at a fixed budget.
+
+    The PUBLISHED Figure 11 weighted arm used weight_col="population" via
+    src/experiments/run_georgia_ablation_population.py, not the aland10 default
+    below. See that script.
     """
     if k_max == 0:
         return centroid_points(gdf)
@@ -124,11 +205,49 @@ def area_jaccard_distance(target: Polygon, discovered: Polygon) -> float:
 
 # ---------- pyScan single-shot --------------------------------------------------
 
+def _store(record, meta, target, bounds, subgrid, p_prob, q, grid_res, pts,
+           n_measured, state, evaluator, point_jd, area_jd=None) -> None:
+    """Append one fully-provenanced row, if the caller asked for records."""
+    if record is None:
+        return
+    try:
+        f_value = float(subgrid.fValue())
+    except Exception:
+        f_value = None
+    row = record_template(
+        group=(meta or {}).get("group"), method=(meta or {}).get("method"),
+        trial=(meta or {}).get("trial"), k=(meta or {}).get("k"),
+        p_prob=p_prob, q=q, target=target, rect_bounds=bounds, f_value=f_value,
+        old_jd=None if evaluator is not None else point_jd,
+        fixed_a_jd=point_jd if evaluator is not None else None,
+        experiment_seed=(meta or {}).get("experiment_seed"),
+        target_index=(meta or {}).get("target_index", 0),
+        weighted=(meta or {}).get("weighted"), grid_res=grid_res,
+        rng_state_before_points=(meta or {}).get("rng_state_before_points"),
+        rng_state_before_bernoulli=state,
+        points_checksum=points_checksum(pts),
+        n_points=int(len(pts)), n_measured=int(n_measured))
+    row["eval_seed"] = EVAL_SEED if evaluator is not None else None
+    row["points_per_region"] = EVAL_POINTS_PER_REGION if evaluator is not None else None
+    row["dataset"] = (meta or {}).get("dataset")
+    if area_jd is not None:
+        row["area_jd"] = area_jd
+    record.append(row)
+
+
 def one_trial_jaccard_with_area(pts: np.ndarray, target: Polygon, p_prob: float, q: float,
-                                grid_res: int, rng: np.random.Generator) -> tuple[float, float]:
-    """Same as `one_trial_jaccard` but returns (point_jd, area_jd)."""
+                                grid_res: int, rng: np.random.Generator,
+                                evaluator: EvalSet | None = None,
+                                record: list | None = None,
+                                meta: dict | None = None) -> tuple[float, float]:
+    """Same as `one_trial_jaccard` but returns (point_jd, area_jd).
+
+    Area Jaccard is computed from the polygons and is therefore identical under
+    both evaluation modes.
+    """
     baseline = []
     measured = []
+    state = _snap(rng)
     inside = np.array([target.contains(Point(x, y)) for x, y in pts])
     coins = rng.random(len(pts))
     for i, (x, y) in enumerate(pts):
@@ -139,29 +258,45 @@ def one_trial_jaccard_with_area(pts: np.ndarray, target: Polygon, p_prob: float,
     grid = pyscan.Grid(grid_res, measured, baseline)
     subgrid = pyscan.max_subgrid(grid, pyscan.KULLDORF)
     rect = grid.toRectangle(subgrid)
+    bounds = (rect.lowX(), rect.lowY(), rect.upX(), rect.upY())
     discovered = Polygon([
         (rect.lowX(), rect.lowY()), (rect.lowX(), rect.upY()),
         (rect.upX(), rect.upY()), (rect.upX(), rect.lowY())
     ])
-    a_u_b = a_n_b = 0
-    for i, (x, y) in enumerate(pts):
-        if coins[i] > (p_prob if inside[i] else q):
-            continue
-        p = Point(float(x), float(y))
-        in_t = inside[i]
-        in_d = discovered.contains(p)
-        if in_t or in_d: a_u_b += 1
-        if in_t and in_d: a_n_b += 1
-    point_jd = ((a_u_b - a_n_b) / a_u_b) if a_u_b > 0 else 1.0
+    if evaluator is not None:
+        point_jd = evaluator.jaccard(target, bounds)
+    else:
+        a_u_b = a_n_b = 0
+        for i, (x, y) in enumerate(pts):
+            if coins[i] > (p_prob if inside[i] else q):
+                continue
+            p = Point(float(x), float(y))
+            in_t = inside[i]
+            in_d = discovered.contains(p)
+            if in_t or in_d: a_u_b += 1
+            if in_t and in_d: a_n_b += 1
+        point_jd = ((a_u_b - a_n_b) / a_u_b) if a_u_b > 0 else 1.0
     area_jd = area_jaccard_distance(target, discovered)
+    _store(record, meta, target, bounds, subgrid, p_prob, q, grid_res, pts,
+           len(measured), state, evaluator, point_jd, area_jd)
     return point_jd, area_jd
 
 
 def one_trial_jaccard(pts: np.ndarray, target: Polygon, p_prob: float, q: float,
-                      grid_res: int, rng: np.random.Generator) -> float:
-    """Generate Poisson-style measured/baseline, scan for best rect, return PJD."""
+                      grid_res: int, rng: np.random.Generator,
+                      evaluator: EvalSet | None = None,
+                      record: list | None = None,
+                      meta: dict | None = None) -> float:
+    """Generate Poisson-style measured/baseline, scan for best rect, return PJD.
+
+    With ``evaluator`` set (the default path), the Point Jaccard distance is
+    measured on the fixed evaluation set A. With ``evaluator=None`` the
+    historical behaviour is used: the overlap is counted only over the points
+    this trial happened to select into ``measured``.
+    """
     baseline = []
     measured = []
+    state = _snap(rng)
     inside = np.array([target.contains(Point(x, y)) for x, y in pts])
     coins = rng.random(len(pts))
     for i, (x, y) in enumerate(pts):
@@ -173,28 +308,32 @@ def one_trial_jaccard(pts: np.ndarray, target: Polygon, p_prob: float, q: float,
     grid = pyscan.Grid(grid_res, measured, baseline)
     subgrid = pyscan.max_subgrid(grid, pyscan.KULLDORF)
     rect = grid.toRectangle(subgrid)
+    bounds = (rect.lowX(), rect.lowY(), rect.upX(), rect.upY())
     discovered = Polygon([
         (rect.lowX(), rect.lowY()), (rect.lowX(), rect.upY()),
         (rect.upX(), rect.upY()), (rect.upX(), rect.lowY())
     ])
 
-    # Point-Jaccard distance over the measured set
-    a_u_b = a_n_b = 0
-    for wp in measured:
-        p = Point(wp.get_x(), wp.get_y()) if hasattr(wp, "get_x") else Point(*pts[0])
-        # Fallback: track inside flags via the loop variables instead of WPoint API
-        pass
-    # Simpler: rebuild Point list from measured (we kept them in same order)
-    a_u_b = 0; a_n_b = 0
-    for i, (x, y) in enumerate(pts):
-        if coins[i] > (p_prob if inside[i] else q):
-            continue
-        p = Point(float(x), float(y))
-        in_t = inside[i]
-        in_d = discovered.contains(p)
-        if in_t or in_d: a_u_b += 1
-        if in_t and in_d: a_n_b += 1
-    return ((a_u_b - a_n_b) / a_u_b) if a_u_b > 0 else 1.0
+    if evaluator is not None:
+        # Point Jaccard on the fixed evaluation set A (same points for every
+        # method, k, rate contrast, trial and seed).
+        jd = evaluator.jaccard(target, bounds)
+    else:
+        # Historical path: Point Jaccard over this trial's measured set only.
+        a_u_b = a_n_b = 0
+        for i, (x, y) in enumerate(pts):
+            if coins[i] > (p_prob if inside[i] else q):
+                continue
+            p = Point(float(x), float(y))
+            in_t = inside[i]
+            in_d = discovered.contains(p)
+            if in_t or in_d: a_u_b += 1
+            if in_t and in_d: a_n_b += 1
+        jd = ((a_u_b - a_n_b) / a_u_b) if a_u_b > 0 else 1.0
+
+    _store(record, meta, target, bounds, subgrid, p_prob, q, grid_res, pts,
+           len(measured), state, evaluator, jd)
+    return jd
 
 
 # ---------- Experiments --------------------------------------------------------
@@ -223,24 +362,35 @@ def run_methods_experiment(name: str, shp_path: str, target: Polygon,
         gdf = gdf[keep].reset_index(drop=True)
         print(f"  [{name}] bbox filter kept {len(gdf)}/{before} regions", flush=True)
 
+    evaluator = build_evaluator(gdf, name)
+
     random.seed(seed); np.random.seed(seed)
     rng = np.random.default_rng(seed)
 
     result = {m: [] for m in METHOD_NAMES}
+    records: list = []
     t0 = time.time()
     for trial in range(n_trials):
         for method in METHOD_NAMES:
+            pre = _snap(rng)
             pts = point_set_for_method(gdf, METHOD_K[method], rng)
             row = []
             for p_prob in pq_grid:
-                jd = one_trial_jaccard(pts, target, float(p_prob), Q, grid_res, rng)
+                jd = one_trial_jaccard(
+                    pts, target, float(p_prob), Q, grid_res, rng,
+                    evaluator=evaluator, record=records,
+                    meta={"group": name, "dataset": name, "method": method,
+                          "trial": trial, "k": METHOD_K[method],
+                          "experiment_seed": seed,
+                          "rng_state_before_points": pre})
                 row.append(jd)
             result[method].append(row)
         elapsed = time.time() - t0
         eta = elapsed / (trial + 1) * (n_trials - trial - 1)
         print(f"  [{name}] trial {trial+1}/{n_trials} done ({elapsed:.1f}s elapsed, {eta:.1f}s ETA)", flush=True)
     pkg = {"methods": result, "pq_diff": (np.array(pq_grid) - Q).round(4).tolist(),
-           "n_trials": n_trials, "seed": seed, "name": name}
+           "n_trials": n_trials, "seed": seed, "name": name,
+           "evaluation": eval_provenance(evaluator), "records": records}
     out = OUT_DIR / f"{name}.pkl"
     with open(out, "wb") as f:
         pickle.dump(pkg, f)
@@ -266,16 +416,19 @@ def run_georgia_ablation_full(name: str, shp_path: str, target: Polygon,
         if weight_col not in gdf.columns:
             raise KeyError(f"weight column '{weight_col}' not in shapefile")
         weights = gdf[weight_col].astype(float).values
+    evaluator = build_evaluator(gdf, name)
     random.seed(seed); np.random.seed(seed)
     rng = np.random.default_rng(seed)
     point_result = {m: [] for m in METHOD_NAMES}
     area_result  = {m: [] for m in METHOD_NAMES}
+    records: list = []
     n_geom_min = {"Centroid": 0, "Random Point": 1, "Geom 5": 1,
                   "Geom 10": 5, "Geom 50": 20}
     t0 = time.time()
     for trial in range(n_trials):
         for method in METHOD_NAMES:
             k = METHOD_K[method]
+            pre = _snap(rng)
             if weighted and k > 0:
                 pts = weighted_point_set_for_method(
                     gdf, weights, k_max=k, k_min=n_geom_min[method], rng=rng)
@@ -284,7 +437,12 @@ def run_georgia_ablation_full(name: str, shp_path: str, target: Polygon,
             pt_row = []; ar_row = []
             for p_prob in pq_grid:
                 pjd, ajd = one_trial_jaccard_with_area(
-                    pts, target, float(p_prob), Q, grid_res, rng)
+                    pts, target, float(p_prob), Q, grid_res, rng,
+                    evaluator=evaluator, record=records,
+                    meta={"group": name, "dataset": name, "method": method,
+                          "trial": trial, "k": k, "experiment_seed": seed,
+                          "weighted": bool(weighted),
+                          "rng_state_before_points": pre})
                 pt_row.append(pjd); ar_row.append(ajd)
             point_result[method].append(pt_row)
             area_result[method].append(ar_row)
@@ -297,7 +455,8 @@ def run_georgia_ablation_full(name: str, shp_path: str, target: Polygon,
            "pq_diff": (np.array(pq_grid) - Q).round(4).tolist(),
            "n_trials": n_trials, "seed": seed, "name": name,
            "sampling": "weighted" if weighted else "uniform",
-           "weight_col": weight_col if weighted else None}
+           "weight_col": weight_col if weighted else None,
+           "evaluation": eval_provenance(evaluator), "records": records}
     out = OUT_DIR / f"{name}.pkl"
     with open(out, "wb") as f:
         pickle.dump(pkg, f)
@@ -319,9 +478,13 @@ def run_size_sweep(name: str, shp_path: str, x_base: float, y_base: float,
     if str(gdf.crs) != "EPSG:4326":
         gdf = gdf.to_crs("EPSG:4326")
     state_area = unary_union(gdf.geometry).area  # in degree^2; fine for ratio
+    # A depends only on the regions, not on the target, so ONE evaluation set
+    # serves every target size; EvalSet caches the in-target mask per target.
+    evaluator = build_evaluator(gdf, name)
     random.seed(seed); np.random.seed(seed)
     rng = np.random.default_rng(seed)
     result = {m: [[] for _ in x_array] for m in METHOD_NAMES}
+    records: list = []
     area_pct = []
     t0 = time.time()
     for t in range(len(x_array)):
@@ -332,8 +495,15 @@ def run_size_sweep(name: str, shp_path: str, x_base: float, y_base: float,
         area_pct.append(float(target.area / state_area * 100.0))
         for trial in range(n_trials):
             for method in METHOD_NAMES:
+                pre = _snap(rng)
                 pts = point_set_for_method(gdf, METHOD_K[method], rng)
-                pjd = one_trial_jaccard(pts, target, float(p_prob), Q, grid_res, rng)
+                pjd = one_trial_jaccard(
+                    pts, target, float(p_prob), Q, grid_res, rng,
+                    evaluator=evaluator, record=records,
+                    meta={"group": name, "dataset": name, "method": method,
+                          "trial": trial, "k": METHOD_K[method],
+                          "experiment_seed": seed, "target_index": t,
+                          "rng_state_before_points": pre})
                 result[method][t].append(pjd)
         elapsed = time.time() - t0
         eta = elapsed / (t + 1) * (len(x_array) - t - 1)
@@ -341,7 +511,8 @@ def run_size_sweep(name: str, shp_path: str, x_base: float, y_base: float,
               f"{elapsed:.1f}s, ETA {eta:.1f}s)", flush=True)
     pkg = {"methods": result, "area_pct": area_pct, "p_prob": p_prob,
            "pq_diff": round(p_prob - Q, 4),
-           "n_trials": n_trials, "seed": seed, "name": name}
+           "n_trials": n_trials, "seed": seed, "name": name,
+           "evaluation": eval_provenance(evaluator), "records": records}
     out = OUT_DIR / f"{name}.pkl"
     with open(out, "wb") as f:
         pickle.dump(pkg, f)
@@ -367,19 +538,29 @@ def run_k_sweep(name: str, shp_path: str, target: Polygon,
         gdf = gdf[keep].reset_index(drop=True)
         print(f"  [{name}] bbox filter kept {len(gdf)} regions", flush=True)
 
+    evaluator = build_evaluator(gdf, name)
+
     random.seed(seed); np.random.seed(seed)
     rng = np.random.default_rng(seed)
 
     result = {int(k): [] for k in k_values}
+    records: list = []
     for trial in range(n_trials):
         for k in k_values:
+            pre = _snap(rng)
             pts = point_set_for_method(gdf, int(k), rng)
-            jd = one_trial_jaccard(pts, target, p_prob, Q, grid_res, rng)
+            jd = one_trial_jaccard(
+                pts, target, p_prob, Q, grid_res, rng,
+                evaluator=evaluator, record=records,
+                meta={"group": name, "dataset": name, "method": f"Geom {k}",
+                      "trial": trial, "k": int(k), "experiment_seed": seed,
+                      "rng_state_before_points": pre})
             result[int(k)].append(jd)
         print(f"  [{name}] trial {trial+1}/{n_trials}", flush=True)
     pkg = {"k_values": list(map(int, k_values)),
            "p_prob": p_prob, "pq_diff": round(p_prob - Q, 4),
-           "by_k": result, "n_trials": n_trials, "seed": seed, "name": name}
+           "by_k": result, "n_trials": n_trials, "seed": seed, "name": name,
+           "evaluation": eval_provenance(evaluator), "records": records}
     out = OUT_DIR / f"{name}.pkl"
     with open(out, "wb") as f:
         pickle.dump(pkg, f)
@@ -388,6 +569,19 @@ def run_k_sweep(name: str, shp_path: str, target: Polygon,
 
 
 # ---------- Experiment registry ------------------------------------------------
+
+# ---------- NYC planted targets --------------------------------------------
+# Figure 3 and the Figure 12 k-sweep were genuinely run on two different NYC
+# targets. Both are kept so each published figure stays reproducible.
+#
+#   NYC_TARGET_FIG3   lat 40.65-40.8, covers 32.8% of NYC land area.
+#                     Produced Figure 3 (buchin_attempt/nyc_grid_resolution_check.py).
+#   NYC_TARGET_KSWEEP lat 40.60-40.8, covers 40.5%.
+#                     Produced the NYC curve in the Figure 12 k-sweep.
+NYC_TARGET_FIG3 = Polygon([(-74.0, 40.65), (-74.0, 40.8),
+                           (-73.8, 40.8), (-73.8, 40.65)])
+NYC_TARGET_KSWEEP = Polygon([(-74.0, 40.6), (-74.0, 40.8),
+                             (-73.8, 40.8), (-73.8, 40.6)])
 
 EXPERIMENTS = {
     # Each entry → (kind, kwargs).  kind ∈ {"methods", "k_sweep"}.
@@ -400,7 +594,9 @@ EXPERIMENTS = {
     "nyc": ("methods", dict(
         name="nyc",
         shp_path=str(DATA / "nyc" / "ZIP_CODE_040114.shp"),
-        target=Polygon([(-74, 40.6), (-74, 40.8), (-73.8, 40.8), (-73.8, 40.6)]),
+        # Figure 3 was produced with latitude 40.65, not 40.6. This target covers
+        # 32.8% of NYC land area, matching the paper's "approximately one-third".
+        target=NYC_TARGET_FIG3,
         n_trials=DEFAULT_TRIALS, pq_grid=DEFAULT_PQ, grid_res=40, seed=DEFAULT_SEED)),
 
     "california": ("methods", dict(
@@ -452,7 +648,9 @@ EXPERIMENTS = {
     "k_sweep_nyc": ("k_sweep", dict(
         name="k_sweep_nyc",
         shp_path=str(DATA / "nyc" / "ZIP_CODE_040114.shp"),
-        target=Polygon([(-74, 40.6), (-74, 40.8), (-73.8, 40.8), (-73.8, 40.6)]),
+        # Deliberately 40.6: this is the target that produced the published
+        # Figure 12 k-sweep curve. Do NOT "fix" it to match Figure 3.
+        target=NYC_TARGET_KSWEEP,
         k_values=[2, 3, 5, 7, 10, 15, 20, 30, 50, 75, 100],
         p_prob=0.35, n_trials=DEFAULT_TRIALS, grid_res=40, seed=DEFAULT_SEED)),
 

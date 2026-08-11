@@ -36,6 +36,9 @@ import pyscan
 from shapely.geometry import Point, Polygon
 
 ARK_SHP = DATA / "arkansas/COUNTY_BOUNDARY.shp"
+# The RUNTIME experiment deliberately uses the finer county-by-congressional-
+# district partition: 3,711 rows after the mainland centroid filter. This is a
+# different input from Figure 6, which scans 3,108 ordinary counties.
 USA_SHP = DATA / "usa/cb_2018_us_county_within_cd116_500k.shp"
 JAVA_CWD = OUTPUTS / "Maarten-implementation"
 JAVA_CP  = "build"
