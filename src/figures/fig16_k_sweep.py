@@ -216,7 +216,7 @@ def render_k_sweep() -> None:
         k0 = float(ark_ks[0])
         pred = ark_d0 * np.sqrt(k0 / ark_ks)
         ax.plot(ark_ks, pred, color="black", lw=1.4, ls=(0, (5, 2)),
-                label=r"Theorem 1: $\propto 1/\sqrt{k}$")
+                label=r"Theorem 3.1: $\propto 1/\sqrt{k}$")
     ax.set_xlabel("$k$ (samples per region)")
     ax.set_ylabel("Point Jaccard Distance")
     ax.set_xscale("log")

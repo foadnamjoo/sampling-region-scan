@@ -39,6 +39,8 @@ import pyscan
 from shapely import affinity
 from shapely.geometry import Point, Polygon
 
+from fixed_a_evaluation import EvalSet  # noqa: E402
+
 DATASETS = [
     {"name": "Utah",
      "shp": DATA / "Utah/geo_export_964ee856-5a3f-431f-b4c6-301973ba317c.shp",
@@ -65,6 +67,14 @@ ITERATIONS  = 20
 P_PROBS     = np.arange(0.20, 0.95, 0.05)
 Q           = 0.20
 GRIDS       = [40, 100]
+
+# Point Jaccard is measured on a fixed evaluation set A that is built once
+# per dataset and shared by every method, k and trial.  Set
+# PYSCAN_LEGACY_MEASURED_JD=1 to reproduce the pre-correction numbers,
+# which scored each trial on its own Bernoulli-selected measured subset.
+EVAL_POINTS_PER_REGION = 500
+EVAL_SEED              = 42
+LEGACY_MEASURED_JD     = os.environ.get("PYSCAN_LEGACY_MEASURED_JD") == "1"
 
 
 def _point_dict_from_shp(gdf, seed):
@@ -93,6 +103,10 @@ def run_dataset(ds):
     point_dict = _point_dict_from_shp(gdf, ds["seed_base"] - 1)
     centroid_xy = _centroid_cal(gdf)
     target = ds["target"]
+    evaluator = None if LEGACY_MEASURED_JD else EvalSet.build(
+        gdf, points_per_region=EVAL_POINTS_PER_REGION, eval_seed=EVAL_SEED)
+    if evaluator is not None:
+        print(f"  fixed evaluation set A: {len(evaluator.points)} points")
 
     results = {m: {g: [] for g in GRIDS} for m in EXP_NAME}
 
@@ -133,23 +147,30 @@ def run_dataset(ds):
                                     (rect.lowX(), rect.upY()),
                                     (rect.upX(), rect.upY()),
                                     (rect.upX(), rect.lowY())))
-                    a_u_b = 0; a_n_b = 0
-                    for wp in measured:
-                        pt = Point(wp.get_coord(0), wp.get_coord(1))
-                        in_t = target.contains(pt); in_d = disc.contains(pt)
-                        if in_t or in_d: a_u_b += 1
-                        if in_t and in_d: a_n_b += 1
-                    if a_u_b == 0: jd = 1.0
+                    if evaluator is not None:
+                        jd = evaluator.jaccard(
+                            target,
+                            (rect.lowX(), rect.lowY(), rect.upX(), rect.upY()))
                     else:
-                        jd = 1 - (a_n_b / a_u_b)
-                        jd = max(0.0, min(jd, 1.0))
+                        # legacy: score on this trial's own measured subset
+                        a_u_b = 0; a_n_b = 0
+                        for wp in measured:
+                            pt = Point(wp.get_coord(0), wp.get_coord(1))
+                            in_t = target.contains(pt); in_d = disc.contains(pt)
+                            if in_t or in_d: a_u_b += 1
+                            if in_t and in_d: a_n_b += 1
+                        jd = 1.0 if a_u_b == 0 else 1 - (a_n_b / a_u_b)
+                    jd = max(0.0, min(jd, 1.0))
                     jd_per_grid[grid_res].append(jd)
             for g in GRIDS:
                 results[exp_name][g].append(jd_per_grid[g])
         print(f"  trial {trial}/{ITERATIONS}  ({time.time()-t_trial:.1f}s)", flush=True)
 
     # Save
-    pkg = {"dataset": ds["name"], "n_regions": n_regions,
+    pkg = {"evaluation": ({"mode": "fixed_A", **evaluator.provenance()}
+                          if evaluator is not None
+                          else {"mode": "legacy_measured_points"}),
+           "dataset": ds["name"], "n_regions": n_regions,
            "iterations": ITERATIONS, "p_probs": P_PROBS.tolist(), "q": Q,
            "grids": GRIDS, "methods": EXP_NAME,
            "target_wkt": target.wkt,

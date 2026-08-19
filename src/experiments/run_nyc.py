@@ -37,6 +37,8 @@ import numpy as np
 import pyscan
 from shapely.geometry import Point, Polygon
 
+from fixed_a_evaluation import EvalSet  # noqa: E402
+
 SHP  = DATA / "nyc/ZIP_CODE_040114.shp"
 OUT_PKL = OUTPUTS / "nyc_grid100_check.pkl"
 OUT_PNG = OUTPUTS / "nyc_grid40_vs_grid100.png"
@@ -52,6 +54,14 @@ P_PROBS     = np.arange(0.20, 0.95, 0.05)
 Q           = 0.20
 GRIDS       = [40, 100]
 SEED_BASE   = 600_000_000_000
+
+# Point Jaccard is measured on a fixed evaluation set A that is built once
+# per dataset and shared by every method, k and trial.  Set
+# PYSCAN_LEGACY_MEASURED_JD=1 to reproduce the pre-correction numbers,
+# which scored each trial on its own Bernoulli-selected measured subset.
+EVAL_POINTS_PER_REGION = 500
+EVAL_SEED              = 42
+LEGACY_MEASURED_JD     = os.environ.get("PYSCAN_LEGACY_MEASURED_JD") == "1"
 
 
 def _point_dict_from_shp(gdf):
@@ -77,6 +87,11 @@ def main():
     gdf = gpd.read_file(SHP).to_crs("EPSG:4326").reset_index(drop=True)
     n_regions = len(gdf)
     print(f"  n_regions = {n_regions}")
+
+    evaluator = None if LEGACY_MEASURED_JD else EvalSet.build(
+        gdf, points_per_region=EVAL_POINTS_PER_REGION, eval_seed=EVAL_SEED)
+    if evaluator is not None:
+        print(f"  fixed evaluation set A: {len(evaluator.points)} points")
 
     print("[load] build 500-pts/region pool ...", flush=True)
     point_dict = _point_dict_from_shp(gdf)
@@ -131,18 +146,20 @@ def main():
                                     (rect.lowX(), rect.upY()),
                                     (rect.upX(), rect.upY()),
                                     (rect.upX(), rect.lowY())))
-                    # m_sample-based JD (same as original cell 94)
-                    a_u_b = 0; a_n_b = 0
-                    for wp in measured:
-                        pt = Point(wp.get_coord(0), wp.get_coord(1))
-                        in_t = NY_TARGET.contains(pt); in_d = disc.contains(pt)
-                        if in_t or in_d: a_u_b += 1
-                        if in_t and in_d: a_n_b += 1
-                    if a_u_b == 0:
-                        jd = 1.0
+                    if evaluator is not None:
+                        jd = evaluator.jaccard(
+                            NY_TARGET,
+                            (rect.lowX(), rect.lowY(), rect.upX(), rect.upY()))
                     else:
-                        jd = 1 - (a_n_b / a_u_b)
-                        jd = max(0.0, min(jd, 1.0))
+                        # legacy: score on this trial's own measured subset
+                        a_u_b = 0; a_n_b = 0
+                        for wp in measured:
+                            pt = Point(wp.get_coord(0), wp.get_coord(1))
+                            in_t = NY_TARGET.contains(pt); in_d = disc.contains(pt)
+                            if in_t or in_d: a_u_b += 1
+                            if in_t and in_d: a_n_b += 1
+                        jd = 1.0 if a_u_b == 0 else 1 - (a_n_b / a_u_b)
+                    jd = max(0.0, min(jd, 1.0))
                     jd_per_grid[grid_res].append(jd)
 
             for g in GRIDS:
@@ -150,7 +167,10 @@ def main():
         print(f"  trial {trial}/{ITERATIONS} done  ({time.time()-t_trial:.1f}s)", flush=True)
 
     # Save
-    pkg = {"target": list(NY_TARGET.exterior.coords),
+    pkg = {"evaluation": ({"mode": "fixed_A", **evaluator.provenance()}
+                          if evaluator is not None
+                          else {"mode": "legacy_measured_points"}),
+           "target": list(NY_TARGET.exterior.coords),
            "n_regions": n_regions, "iterations": ITERATIONS,
            "p_probs": P_PROBS.tolist(), "q": Q,
            "grids": GRIDS,

@@ -126,7 +126,9 @@ def _finish_chrome(fig, ax, title, xlabel, ncol):
 # Fig 6, Fig 8, Fig 9 — standard methods curves (with FlexScan for Arkansas)
 # ---------------------------------------------------------------------------
 
-USA_SHP = DATA / "usa" / "cb_2018_us_county_within_cd116_500k.shp"
+# Figure 6 scans the 3,108 ordinary counties, not the 3,711 county-by-
+# congressional-district rows (those are the runtime-table input).
+USA_SHP = DATA / "usa" / "cb_2017_us_county_500k.shp"
 ARK_SHP = DATA / "arkansas" / "COUNTY_BOUNDARY.shp"
 
 USA_TARGET = Polygon([(-100, 33), (-100, 40), (-90, 40), (-90, 33)])
