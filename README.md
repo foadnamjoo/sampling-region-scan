@@ -14,9 +14,19 @@ Code and figure scripts for the paper:
 
 > **Sampling for Region-Aggregated Spatial Scan Statistics.**
 > Foad Namjoo, Drew McClelland, Michael Matheny, Jeff M. Phillips.
-> *[arXiv:2607.01451](https://arxiv.org/abs/2607.01451) — under review.*
+> *Proc. 34th ACM SIGSPATIAL Int. Conf. on Advances in Geographic Information Systems
+> (SIGSPATIAL '26).* Preprint: [arXiv:2607.01451](https://arxiv.org/abs/2607.01451).
 
 This repository contains the Python experiments and figure-rendering scripts that reproduce every figure and runtime table in the paper, built on top of [pyScan](https://github.com/michaelmathen/pyscan).
+
+> **Note on the reported numbers.** Earlier drafts — including arXiv v1 — scored each
+> trial's Point Jaccard distance on that trial's own Bernoulli-selected measured points,
+> so different methods were compared on different supports. All values are now measured
+> on a single fixed evaluation set *A*: 500 uniform points per region, built once per
+> dataset from a separate seed and reused across every method, *k*, rate contrast, trial
+> and experiment seed. The conclusions are unchanged — Geom 50 still wins on every
+> dataset — but a number of individual values moved. Set `PYSCAN_LEGACY_MEASURED_JD=1`
+> to reproduce the pre-correction numbers.
 
 ## What's in the paper
 
@@ -130,9 +140,13 @@ outputs/                     Generated figures and pickles (gitignored)
 
 Machine-readable metadata is in [`CITATION.cff`](CITATION.cff) at the repo root; GitHub renders a "Cite this repository" button from it in the sidebar.
 
-> Preprint: [arXiv:2607.01451](https://arxiv.org/abs/2607.01451). Camera-ready citation will be added after acceptance.
+> Foad Namjoo, Drew McClelland, Michael Matheny, and Jeff M. Phillips. 2026.
+> Sampling for Region-Aggregated Spatial Scan Statistics. In *Proceedings of the 34th
+> ACM SIGSPATIAL International Conference on Advances in Geographic Information
+> Systems* (SIGSPATIAL '26).
 
-To cite the preprint, use the `CITATION.cff` metadata or the arXiv reference above.
+Preprint: [arXiv:2607.01451](https://arxiv.org/abs/2607.01451). The DOI will be added
+here once ACM issues it.
 
 ## Acknowledgments
 

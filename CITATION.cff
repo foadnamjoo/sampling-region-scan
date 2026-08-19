@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite the paper below (arXiv:2607.01451)."
+message: "If you use this software, please cite the paper below."
 title: "Sampling for Region-Aggregated Spatial Scan Statistics"
 authors:
   - family-names: Namjoo
@@ -17,7 +17,7 @@ authors:
 license: MIT
 repository-code: "https://github.com/foadnamjoo/sampling-region-scan"
 preferred-citation:
-  type: article
+  type: conference-paper
   title: "Sampling for Region-Aggregated Spatial Scan Statistics"
   authors:
     - family-names: Namjoo
@@ -29,8 +29,18 @@ preferred-citation:
     - family-names: Phillips
       given-names: "Jeff M."
   year: 2026
+  collection-title: "Proceedings of the 34th ACM SIGSPATIAL International Conference on Advances in Geographic Information Systems"
+  conference:
+    name: "SIGSPATIAL '26"
+    city: "Riverside"
+    region: "California"
+    country: "US"
+    date-start: "2026-11-03"
+    date-end: "2026-11-06"
+  publisher:
+    name: "Association for Computing Machinery"
   url: "https://arxiv.org/abs/2607.01451"
   identifiers:
     - type: other
       value: "arXiv:2607.01451"
-  notes: "Preprint; under review."
+  notes: "Accepted at ACM SIGSPATIAL 2026. DOI to be added once issued."
