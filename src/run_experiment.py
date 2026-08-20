@@ -621,6 +621,8 @@ EXPERIMENTS = {
         target=Polygon([(-84.5, 31.5), (-84.5, 34), (-82.5, 34), (-82.5, 31.5)]),
         n_trials=DEFAULT_TRIALS, pq_grid=DEFAULT_PQ, grid_res=40, seed=DEFAULT_SEED)),
 
+    # Registered under both names: the output pickle is k_sweep_arkansas.pkl,
+    # so "k_sweep_arkansas" keeps the CLI consistent with the other five.
     "k_sweep": ("k_sweep", dict(
         name="k_sweep_arkansas",
         shp_path=str(DATA / "arkansas" / "COUNTY_BOUNDARY.shp"),
@@ -696,6 +698,8 @@ EXPERIMENTS = {
         n_trials=DEFAULT_TRIALS, pq_grid=DEFAULT_PQ, grid_res=40, seed=DEFAULT_SEED,
         weighted=True, weight_col="aland10")),
 }
+
+EXPERIMENTS["k_sweep_arkansas"] = EXPERIMENTS["k_sweep"]
 
 
 def main(argv):

@@ -110,12 +110,31 @@ Each figure corresponds to a single script under `src/figures/`. Many figures de
 | Figs 8, 9 — Arkansas vs FlexScan + Buchin | `src/experiments/run_buchin_rect.py` | `src/figures/fig08_09_arkansas_buchin.py` |
 | Fig 10 — Rect map, all methods | `src/experiments/run_buchin_rect.py` | `src/figures/fig12_17_18_buchin_maps.py` |
 | Fig 11 — Georgia ablation | `src/experiments/run_georgia_ablation.py`, `run_georgia_ablation_population.py` | `src/figures/fig14_georgia_ablation.py` |
-| Fig 12 — k-sweep across datasets | (uses cached results) | `src/figures/fig16_k_sweep.py` |
+| Fig 12 — k-sweep across datasets | `python src/run_experiment.py k_sweep_<dataset>` for each of the six, once per seed (see below) | `src/figures/fig16_k_sweep.py` |
 | Fig 13 — California Valley Fever (real data) | `src/run_experiment_real.py --valley` | `src/figures/fig15_16_valley_fever.py` |
 | Figs 14, 15 — Disk Buchin comparison (App B) | `src/experiments/run_buchin_disk.py` | `src/figures/fig12_17_18_buchin_maps.py` |
 | Table 1 — Runtime | `src/experiments/run_runtime.py` | (printed to stdout) |
 
 All outputs are written under `outputs/` (gitignored).
+
+### Figure 12: the three-seed protocol
+
+Figure 12 reports **60 trials per k**: 20 trials for each of the seeds 7, 31 and 67.
+The renderer looks for `outputs/cached_data/k_sweep_<dataset>.pkl` (seed 7, the
+default) alongside `_seed31` and `_seed67` variants, so each of the six datasets
+has to be run three times:
+
+```bash
+for d in arkansas utah california georgia nyc usa; do
+  python src/run_experiment.py k_sweep_$d
+  python src/run_experiment.py k_sweep_$d seed=31
+  python src/run_experiment.py k_sweep_$d seed=67
+done
+python src/figures/fig16_k_sweep.py
+```
+
+A run with a non-default seed writes to `k_sweep_<dataset>_seed<N>.pkl`; the
+renderer pools all three. This is the longest experiment in the repo.
 
 ## Repository structure
 

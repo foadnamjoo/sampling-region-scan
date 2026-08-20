@@ -28,7 +28,7 @@ import numpy as np
 sys.path.insert(0, str(ROOT / "scripts"))
 import paper_plots as pp  # noqa: E402
 
-CACHE = ROOT / "cached_data"
+CACHE = OUTPUTS / "cached_data"   # where run_experiment.py writes
 OUT = ROOT / "new_PlotsPDF"
 
 FIGSIZE = (3.45, 2.65)  # tight two-col-half size (v8)
