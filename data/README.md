@@ -43,8 +43,6 @@ All scripts internally re-project everything to **EPSG:4326** (lon/lat degrees).
 
 Two side-experiment folders may appear locally in `data/` if you're exploring the codebase:
 
-- `data/cholera_snow/` — John Snow's 1854 Broad Street cholera outbreak (deaths + pump locations). Used by `src/run_experiment_real.py --cholera` for a historical validation demo. Source: [Robin Wilson's georeferenced Snow shapefiles](http://blog.rtwilson.com/john-snows-cholera-data-in-more-formats/).
-- `data/scotland_lip/` — 1975–1980 Scottish lip-cancer incidence per health district. Used by `src/run_experiment_real.py --scotland`. Source: [SpatialEpi R package](https://cran.r-project.org/web/packages/SpatialEpi/index.html) or the original Clayton & Kaldor (1987) dataset.
 
 These are **not referenced by any figure or table in the paper**. They are gitignored (see `.gitignore` at the repo root) and included in the codebase only as auxiliary sanity checks against classic published clusters. If you don't need them, ignore both; the paper's results are fully reproducible without them.
 

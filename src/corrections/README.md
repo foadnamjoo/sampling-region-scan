@@ -76,7 +76,7 @@ checksum of the generated point coordinates.
 ## Reproducing
 
 ```bash
-B=/Users/foadnamjoo/PROJECT/PYSCAN/pyscan/build
+B=/path/to/pyscan/build
 export DYLD_FALLBACK_LIBRARY_PATH="$B/thirdparty/discrepancy:$B/thirdparty/kernel/coreset:$B/thirdparty/kernel/ANN"
 python scripts/fixedA_v2.py usa gasize gaablation ksweep
 python scripts/report_fixedA.py

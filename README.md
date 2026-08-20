@@ -105,11 +105,11 @@ Each figure corresponds to a single script under `src/figures/`. Many figures de
 | Fig 1 — Arkansas region sampling | — | `src/figures/fig01_arkansas_sampling.py` |
 | Fig 2 — JD Arkansas, Geom 5 | `src/experiments/run_arkansas.py` | `src/figures/fig02_jdarkansas.py` |
 | Figs 3, 4, 5 — NYC, Utah, California | `src/experiments/run_nyc.py`, `run_utah_california.py` | `src/figures/fig03_06_state_curves.py` |
-| Fig 6 — USA counties | `src/experiments/run_usa.py` (cached at `outputs/usa/`) | `src/figures/fig07_georgia_size.py` (`render_fig6_usa`) |
+| Fig 6 — USA counties | `python src/run_experiment.py usa` | `src/figures/fig07_georgia_size.py` (`render_fig6_usa`) |
 | Fig 7 — Georgia size sweep | `src/experiments/run_georgia_size.py` | `src/figures/fig07_georgia_size.py` |
 | Figs 8, 9 — Arkansas vs FlexScan + Buchin | `src/experiments/run_buchin_rect.py` | `src/figures/fig08_09_arkansas_buchin.py` |
 | Fig 10 — Rect map, all methods | `src/experiments/run_buchin_rect.py` | `src/figures/fig12_17_18_buchin_maps.py` |
-| Fig 11 — Georgia ablation | `src/experiments/run_georgia_ablation.py` | `src/figures/fig14_georgia_ablation.py` |
+| Fig 11 — Georgia ablation | `src/experiments/run_georgia_ablation.py`, `run_georgia_ablation_population.py` | `src/figures/fig14_georgia_ablation.py` |
 | Fig 12 — k-sweep across datasets | (uses cached results) | `src/figures/fig16_k_sweep.py` |
 | Fig 13 — California Valley Fever (real data) | `src/run_experiment_real.py --valley` | `src/figures/fig15_16_valley_fever.py` |
 | Figs 14, 15 — Disk Buchin comparison (App B) | `src/experiments/run_buchin_disk.py` | `src/figures/fig12_17_18_buchin_maps.py` |
@@ -125,7 +125,7 @@ src/
   paper_plots.py             Shared matplotlib styling (v8 / v9)
   shape_floor.py             Shape-family floor computation (Fig 2)
   run_experiment.py          Synthetic experiment registry + sampling helpers
-  run_experiment_real.py     Real-data pipeline (Valley Fever, Fig 13)
+  run_experiment_real.py     Real-data pipeline (California Valley Fever, Fig 13)
   run_buchin_comparison.py   Buchin et al. (2012) Java head-to-head driver
   arkansas_disk_stress.py    Disk-family stress test (Figs 14, 15)
   render_paper_figs_inset.py Inset-map renderer used by several figures
