@@ -57,8 +57,8 @@ SEED_BASE   = 600_000_000_000
 
 # Point Jaccard is measured on a fixed evaluation set A that is built once
 # per dataset and shared by every method, k and trial.  Set
-# PYSCAN_LEGACY_MEASURED_JD=1 to reproduce the pre-correction numbers,
-# which scored each trial on its own Bernoulli-selected measured subset.
+# PYSCAN_LEGACY_MEASURED_JD=1 to score each trial on its own measured
+# subset instead.
 EVAL_POINTS_PER_REGION = 500
 EVAL_SEED              = 42
 LEGACY_MEASURED_JD     = os.environ.get("PYSCAN_LEGACY_MEASURED_JD") == "1"

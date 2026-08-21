@@ -20,15 +20,6 @@ Code and figure scripts for the paper:
 
 This repository contains the Python experiments and figure-rendering scripts that reproduce every figure and runtime table in the paper, built on top of [pyScan](https://github.com/michaelmathen/pyscan).
 
-> **Note on the reported numbers.** Earlier drafts — including arXiv v1 — scored each
-> trial's Point Jaccard distance on that trial's own Bernoulli-selected measured points,
-> so different methods were compared on different supports. All values are now measured
-> on a single fixed evaluation set *A*: 500 uniform points per region, built once per
-> dataset from a separate seed and reused across every method, *k*, rate contrast, trial
-> and experiment seed. The conclusions are unchanged — Geom 50 still wins on every
-> dataset — but a number of individual values moved. Set `PYSCAN_LEGACY_MEASURED_JD=1`
-> to reproduce the pre-correction numbers.
-
 ## What's in the paper
 
 We replace each spatial region with `k = 20–50` uniformly-sampled points (instead of a single centroid). This simple change significantly improves the statistical power of point-based spatial scan statistics applied to region-aggregated input (census tracts, zip codes, counties), without changing the underlying scan algorithm. Runtime stays roughly constant because pyScan's fixed-resolution grid scan does not depend on the input point count.

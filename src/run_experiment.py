@@ -23,9 +23,8 @@ default for all four experiment kinds. A is drawn from its own generator, so
 constructing it perturbs no scan location, no Bernoulli draw and no discovered
 rectangle. Area Jaccard is polygon-based and is unaffected.
 
-Set PYSCAN_LEGACY_MEASURED_JD=1 to restore the historical behaviour, in which
-each trial was scored only on the points it happened to select. That flag exists
-solely to reproduce previously published numbers.
+Setting PYSCAN_LEGACY_MEASURED_JD=1 selects an alternative mode that scores each
+trial on the measured points it selected, rather than on A.
 """
 from __future__ import annotations
 
@@ -76,10 +75,9 @@ METHOD_NAMES = ["Centroid", "Random Point", "Geom 5", "Geom 10", "Geom 50"]
 METHOD_K = {"Centroid": 0, "Random Point": 1, "Geom 5": 5, "Geom 10": 10, "Geom 50": 50}
 
 # ---------- Fixed evaluation set A ----------------------------------------------
-# The paper defines Point Jaccard distance on a fixed reference set A. Fixed-A
-# evaluation is the DEFAULT here. Set PYSCAN_LEGACY_MEASURED_JD=1 to fall back to
-# the historical behaviour (scoring each trial on its own Bernoulli-selected
-# measured points), which exists only to reproduce previously published numbers.
+# The paper defines Point Jaccard distance on a fixed reference set A, and that
+# is the default here. PYSCAN_LEGACY_MEASURED_JD=1 selects the alternative mode
+# that scores each trial on its own measured points instead.
 EVAL_SEED = DEFAULT_EVAL_SEED                      # 42
 EVAL_POINTS_PER_REGION = DEFAULT_POINTS_PER_REGION  # 500
 LEGACY_MEASURED_JD = os.environ.get("PYSCAN_LEGACY_MEASURED_JD", "0") == "1"
@@ -94,8 +92,8 @@ def build_evaluator(gdf, name: str = "") -> EvalSet | None:
     location, no Bernoulli coin and no discovered rectangle.
     """
     if not USE_FIXED_A:
-        print(f"  [{name}] LEGACY evaluation (PYSCAN_LEGACY_MEASURED_JD=1): Point "
-              f"Jaccard scored on each trial's measured points", flush=True)
+        print(f"  [{name}] PYSCAN_LEGACY_MEASURED_JD=1: Point Jaccard scored on "
+              f"each trial's measured points", flush=True)
         return None
     ev = EvalSet.build(gdf, points_per_region=EVAL_POINTS_PER_REGION,
                        eval_seed=EVAL_SEED)
@@ -290,9 +288,8 @@ def one_trial_jaccard(pts: np.ndarray, target: Polygon, p_prob: float, q: float,
     """Generate Poisson-style measured/baseline, scan for best rect, return PJD.
 
     With ``evaluator`` set (the default path), the Point Jaccard distance is
-    measured on the fixed evaluation set A. With ``evaluator=None`` the
-    historical behaviour is used: the overlap is counted only over the points
-    this trial happened to select into ``measured``.
+    measured on the fixed evaluation set A. With ``evaluator=None`` the overlap
+    is counted only over the points this trial selected into ``measured``.
     """
     baseline = []
     measured = []
@@ -319,7 +316,7 @@ def one_trial_jaccard(pts: np.ndarray, target: Polygon, p_prob: float, q: float,
         # method, k, rate contrast, trial and seed).
         jd = evaluator.jaccard(target, bounds)
     else:
-        # Historical path: Point Jaccard over this trial's measured set only.
+        # Alternative path: Point Jaccard over this trial's measured set only.
         a_u_b = a_n_b = 0
         for i, (x, y) in enumerate(pts):
             if coins[i] > (p_prob if inside[i] else q):

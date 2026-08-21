@@ -4,11 +4,8 @@ The paper defines Point Jaccard distance on a fixed reference set A: 500 points
 sampled uniformly inside every input region, constructed once and reused across
 every method, k, p-q value, trial and experiment seed.
 
-Earlier synthetic pipelines instead evaluated the overlap on each trial's
-Bernoulli-selected measured points, so every method was scored on a different
-support. This module provides the fixed-A evaluation and is the default for new
-synthetic experiments; the historical behaviour remains available so previously
-published numbers can still be reproduced exactly.
+This module implements that fixed-A evaluation, which every synthetic experiment
+in this repository uses by default.
 
 Typical use
 -----------
@@ -38,7 +35,7 @@ from shapely.geometry import Point, Polygon
 DEFAULT_EVAL_SEED = 42
 DEFAULT_POINTS_PER_REGION = 500
 
-# Set False only to reproduce pre-correction published numbers.
+# Set False to score on each trial's measured points instead.
 EVALUATE_ON_FIXED_A = True
 
 
