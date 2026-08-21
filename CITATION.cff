@@ -39,8 +39,11 @@ preferred-citation:
     date-end: "2026-11-06"
   publisher:
     name: "Association for Computing Machinery"
-  url: "https://arxiv.org/abs/2607.01451"
+  doi: "10.1145/3841645.3842988"
+  url: "https://doi.org/10.1145/3841645.3842988"
   identifiers:
+    - type: doi
+      value: "10.1145/3841645.3842988"
     - type: other
       value: "arXiv:2607.01451"
-  notes: "Accepted at ACM SIGSPATIAL 2026. DOI to be added once issued."
+  notes: "Accepted at ACM SIGSPATIAL 2026. Preprint: arXiv:2607.01451."

@@ -15,7 +15,8 @@ Code and figure scripts for the paper:
 > **Sampling for Region-Aggregated Spatial Scan Statistics.**
 > Foad Namjoo, Drew McClelland, Michael Matheny, Jeff M. Phillips.
 > *Proc. 34th ACM SIGSPATIAL Int. Conf. on Advances in Geographic Information Systems
-> (SIGSPATIAL '26).* Preprint: [arXiv:2607.01451](https://arxiv.org/abs/2607.01451).
+> (SIGSPATIAL '26).* [doi:10.1145/3841645.3842988](https://doi.org/10.1145/3841645.3842988).
+> Preprint: [arXiv:2607.01451](https://arxiv.org/abs/2607.01451).
 
 This repository contains the Python experiments and figure-rendering scripts that reproduce every figure and runtime table in the paper, built on top of [pyScan](https://github.com/michaelmathen/pyscan).
 
@@ -164,8 +165,8 @@ Machine-readable metadata is in [`CITATION.cff`](CITATION.cff) at the repo root;
 > ACM SIGSPATIAL International Conference on Advances in Geographic Information
 > Systems* (SIGSPATIAL '26).
 
-Preprint: [arXiv:2607.01451](https://arxiv.org/abs/2607.01451). The DOI will be added
-here once ACM issues it.
+DOI: [10.1145/3841645.3842988](https://doi.org/10.1145/3841645.3842988) — the link becomes live when ACM publishes the
+proceedings. Preprint: [arXiv:2607.01451](https://arxiv.org/abs/2607.01451).
 
 ## Acknowledgments
 
