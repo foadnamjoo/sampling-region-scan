@@ -2,6 +2,9 @@ from __future__ import annotations
 
 """Georgia ablation — Grid(40) vs Grid(100) paired check.
 
+Note: the weighted arm in the paper (Fig 11) is the population-weighted re-run in
+run_georgia_ablation_population.py; the land-area arm written here is kept for reference.
+
 Mirrors run_experiment.py's `georgia_ablation_uniform` + `georgia_ablation_weighted`
 configs EXACTLY (same shapefile, target, n_trials=20, pq_grid, seed=7,
 weight_col='aland10' for the weighted variant) — the ONLY change is
