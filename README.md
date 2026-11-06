@@ -17,12 +17,13 @@ Code and figure scripts for the paper:
 > *Proc. 34th ACM SIGSPATIAL Int. Conf. on Advances in Geographic Information Systems
 > (SIGSPATIAL '26).* [doi:10.1145/3841645.3842988](https://doi.org/10.1145/3841645.3842988).
 > Preprint: [arXiv:2607.01451](https://arxiv.org/abs/2607.01451).
+> Slides from the SIGSPATIAL 2026 talk (Research 5, Nov 5, 2026): [`slides/SIGSPATIAL2026_Namjoo_talk.pdf`](slides/SIGSPATIAL2026_Namjoo_talk.pdf).
 
 This repository contains the Python experiments and figure-rendering scripts that reproduce every figure and runtime table in the paper, built on top of [pyScan](https://github.com/michaelmathen/pyscan).
 
 ## What's in the paper
 
-We replace each spatial region with `k = 20–50` uniformly-sampled points (instead of a single centroid). This simple change significantly improves the statistical power of point-based spatial scan statistics applied to region-aggregated input (census tracts, zip codes, counties), without changing the underlying scan algorithm. Runtime stays roughly constant because pyScan's fixed-resolution grid scan does not depend on the input point count.
+We replace each spatial region with `k = 20–50` uniformly-sampled points (instead of a single centroid). This simple change significantly improves the statistical power of point-based spatial scan statistics applied to region-aggregated input (census tracts, zip codes, counties), without changing the underlying scan algorithm. Runtime stays roughly constant because pyScan's scan time is set by the size of its data-adaptive grid (100 × 100), not by the number of input points.
 
 We validate the method on six planted-region datasets (Arkansas, NYC, Utah, California, Georgia, USA) and on real data — California Valley Fever county-level incidence, where the endemic region is fixed by soil ecology rather than the case counts.
 
@@ -101,7 +102,7 @@ Each figure corresponds to a single script under `src/figures/`. Many figures de
 | Fig 7 — Georgia size sweep | `src/experiments/run_georgia_size.py` | `src/figures/fig07_georgia_size.py` |
 | Figs 8, 9 — Arkansas vs FlexScan + Buchin | `src/experiments/run_buchin_rect.py` | `src/figures/fig08_09_arkansas_buchin.py` |
 | Fig 10 — Rect map, all methods | `src/experiments/run_buchin_rect.py` | `src/figures/fig12_17_18_buchin_maps.py` |
-| Fig 11 — Georgia ablation | `src/experiments/run_georgia_ablation.py`, `run_georgia_ablation_population.py` | `src/figures/fig14_georgia_ablation.py` |
+| Fig 11 — Georgia ablation | `src/experiments/run_georgia_ablation.py` (uniform arm), then `run_georgia_ablation_population.py` (population-weighted arm, as in the paper) | `src/figures/fig14_georgia_ablation.py` |
 | Fig 12 — k-sweep across datasets | `python src/run_experiment.py k_sweep_<dataset>` for each of the six, once per seed (see below) | `src/figures/fig16_k_sweep.py` |
 | Fig 13 — California Valley Fever (real data) | `src/run_experiment_real.py --valley` | `src/figures/fig15_16_valley_fever.py` |
 | Figs 14, 15 — Disk Buchin comparison (App B) | `src/experiments/run_buchin_disk.py` | `src/figures/fig12_17_18_buchin_maps.py` |

@@ -90,7 +90,7 @@ def render_fig14_grid100_2x2() -> None:
         "legend.fontsize": 12.0,
     })
     u = _load("georgia_ablation_uniform_grid100")
-    w = _load("georgia_ablation_weighted_grid100")
+    w = _load("georgia_ablation_weighted_pop_grid100")
     pq = np.asarray(u["pq_diff"])
     assert np.allclose(pq, np.asarray(w["pq_diff"]))
 
@@ -169,7 +169,7 @@ def render_geom50_4way(
         Fractional padding added to the data-driven inset y-limits.
     """
     u = _load("georgia_ablation_uniform_grid100")
-    w = _load("georgia_ablation_weighted_grid100")
+    w = _load("georgia_ablation_weighted_pop_grid100")
     pq = np.asarray(u["pq_diff"])
 
     # --- Publication style matching paper Fig 14 (seaborn-darkgrid
